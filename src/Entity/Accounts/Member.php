@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Accounts;
 
-use App\Repository\MemberRepository;
+use App\Entity\Chat\Message;
+use App\Entity\Posts\Post;
+use App\Entity\Posts\PostShare;
+use App\Repository\Accounts\MemberRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;

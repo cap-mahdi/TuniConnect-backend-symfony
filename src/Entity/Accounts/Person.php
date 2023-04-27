@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Accounts;
 
-use App\Repository\PersonRepository;
+use App\Repository\Posts\PersonRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Accounts\User;
 
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
 #[ORM\InheritanceType("JOINED")]
@@ -34,7 +35,7 @@ class Person
 
     #[ORM\OneToOne(inversedBy: 'person', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    protected ?Account $account = null;
+    protected ?User $user = null;
 
     public function getId(): ?int
     {
@@ -101,14 +102,14 @@ class Person
         return $this;
     }
 
-    public function getAccount(): ?Account
+    public function getUser(): ?User
     {
-        return $this->account;
+        return $this->user;
     }
 
-    public function setAccount(Account $account): self
+    public function setUser(User $user): self
     {
-        $this->account = $account;
+        $this->user = $user;
 
         return $this;
     }
