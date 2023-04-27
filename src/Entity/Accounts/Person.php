@@ -20,14 +20,10 @@ class Person
     #[ORM\Column(length: 50)]
     protected ?string $name = null;
 
-    #[ORM\Column(length: 100)]
-    protected ?string $email = null;
 
     #[ORM\Column]
     protected ?int $phone = null;
 
-    #[ORM\Column]
-    protected ?bool $isAdmin = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -54,17 +50,7 @@ class Person
         return $this;
     }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
 
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
 
     public function getPhone(): ?int
     {
@@ -78,17 +64,6 @@ class Person
         return $this;
     }
 
-    public function isIsAdmin(): ?bool
-    {
-        return $this->isAdmin;
-    }
-
-    public function setIsAdmin(bool $isAdmin): self
-    {
-        $this->isAdmin = $isAdmin;
-
-        return $this;
-    }
 
     public function getAddress(): ?Address
     {
