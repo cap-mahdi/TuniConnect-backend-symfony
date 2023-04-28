@@ -26,21 +26,10 @@ class Person
     protected ?string $name = null;
 
 
-    #[ORM\Column(length: 100)]
-    #[Groups("member")]
-
-    protected ?string $email = null;
-
     #[ORM\Column]
     #[Groups("member")]
 
     protected ?int $phone = null;
-
-    #[ORM\Column]
-    #[Groups("member")]
-
-
-    protected ?bool $isAdmin = null;
 
 
     #[ORM\ManyToOne]
