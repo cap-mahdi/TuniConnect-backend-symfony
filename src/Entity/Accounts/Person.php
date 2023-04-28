@@ -5,6 +5,7 @@ namespace App\Entity\Accounts;
 use App\Repository\Posts\PersonRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Accounts\User;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
 #[ORM\InheritanceType("JOINED")]
@@ -15,22 +16,33 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("member")]
+
     protected ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups("member")]
+
     protected ?string $name = null;
 
 
     #[ORM\Column]
+    #[Groups("member")]
+
     protected ?int $phone = null;
 
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups("member")]
+
     protected ?Address $address = null;
+
 
     #[ORM\OneToOne(inversedBy: 'person', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups("member")]
+
     protected ?User $user = null;
 
     public function getId(): ?int
