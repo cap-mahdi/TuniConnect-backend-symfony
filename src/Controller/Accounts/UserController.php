@@ -7,7 +7,7 @@ use App\Repository\Accounts\UserRepository;
 use App\Repository\Posts\PersonRepository;
 use mysql_xdevapi\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{Response,Request};
+use Symfony\Component\HttpFoundation\{Response, Request};
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -20,8 +20,8 @@ class UserController extends AbstractController
     {
     }
 
-    #[Route('/user/add', name: 'app_user_add',methods: ['POST'])]
-    public function addUser(Request $request,UserRepository $userRepository,PersonRepository $personRepository): Response
+    #[Route('/user/add', name: 'app_user_add', methods: ['POST'])]
+    public function addUser(Request $request, UserRepository $userRepository, PersonRepository $personRepository): Response
     {
         try {
         $data = json_decode($request->getContent(), true);
@@ -53,7 +53,7 @@ public function delete(Request $request,UserRepository $userRepository):Response
         return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
     }
 
-}
+    }
 
 #[Route("/user/find", name: "app_user_find",methods: ["GET"])]
 public function getUsers(Request $request,UserRepository $userRepository):Response
@@ -74,36 +74,6 @@ public function getUsers(Request $request,UserRepository $userRepository):Respon
     }
 
 }
-
-#[Route("user/edit/{id}",name:"app_user_edit",methods:["PUT"])]
-public function editUser(Request $request,UserRepository $userRepository):Response
-{
-
-    try {
-        $idUser=$request->attributes->get("_route_params")["id"];
-        $user=$userRepository->find(intval($idUser));
-        if($request->query->has("email")){
-            $user->setEmail($request->query->get("email"));
-        }
-        if($request->query->has("password")&&$request->query->has("oldPassword")){
-            if($this->hasher->isPasswordValid($user,$request->query->get("oldPassword"))) {
-                $userRepository->upgradePassword($user, $this->hasher->hashPassword($request->query->get("password")));
-            }
-        }
-        $userRepository->save($user,true);
-        return $this->json($user,200, ["Content-Type" => "application/json"]);
-
-
-    }
-    catch (Exception $exception){
-        return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
-    }
-}
-
-
-
-
-
 
 
 }
