@@ -20,7 +20,7 @@ class Member extends Person
     #[ORM\ManyToMany(targetEntity: Message::class, mappedBy: 'receivers')]
     private Collection $messagesReceived;
 
-    #[ORM\OneToMany(mappedBy: 'poster', targetEntity: Post::class)]
+    #[ORM\OneToMany(mappedBy: 'poster',targetEntity: Post::class)]
     private Collection $posts;
 
     #[ORM\OneToMany(mappedBy: 'member', targetEntity: PostShare::class)]
