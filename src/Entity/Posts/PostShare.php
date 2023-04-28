@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Posts;
 
-use App\Repository\PostShareRepository;
+use App\Entity\Accounts\Member;
+use App\Repository\Posts\PostShareRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 

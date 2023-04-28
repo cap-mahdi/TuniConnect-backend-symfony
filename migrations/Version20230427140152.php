@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230422085006 extends AbstractMigration
+final class Version20230427140152 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,12 +20,14 @@ final class Version20230422085006 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE message ADD date DATETIME NOT NULL');
+        $this->addSql('DROP TABLE account');
+        $this->addSql('ALTER TABLE member ADD date_of_membership DATE NOT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE message DROP date');
+        $this->addSql('CREATE TABLE account (id INT AUTO_INCREMENT NOT NULL, password VARCHAR(50) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');
+        $this->addSql('ALTER TABLE `member` DROP date_of_membership');
     }
 }

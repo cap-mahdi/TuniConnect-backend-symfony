@@ -1,27 +1,43 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Accounts;
 
-use App\Repository\MemberRepository;
+use App\Entity\Chat\Message;
+use App\Entity\Posts\Post;
+use App\Entity\Posts\PostShare;
+use App\Repository\Accounts\MemberRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use DateTimeInterface ;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MemberRepository::class)]
 #[ORM\Table(name: '`member`')]
 class Member extends Person
 {
+
     #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class)]
     private Collection $messagesSent;
 
+
     #[ORM\ManyToMany(targetEntity: Message::class, mappedBy: 'receivers')]
+
     private Collection $messagesReceived;
 
+
     #[ORM\OneToMany(mappedBy: 'poster', targetEntity: Post::class)]
+
     private Collection $posts;
+
 
     #[ORM\OneToMany(mappedBy: 'member', targetEntity: PostShare::class)]
     private Collection $sharedPost;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups("member")]
+    private ?\DateTimeInterface $dateOfMembership = null;
 
 
 
@@ -149,6 +165,18 @@ class Member extends Person
                 $sharedPost->setMember(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDateOfMembership(): ?\DateTimeInterface
+    {
+        return $this->dateOfMembership;
+    }
+
+    public function setDateOfMembership(DateTimeInterface $dateOfMembership): self
+    {
+        $this->dateOfMembership = $dateOfMembership;
 
         return $this;
     }

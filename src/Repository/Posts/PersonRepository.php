@@ -1,27 +1,27 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Posts;
 
-use App\Entity\PostShare;
+use App\Entity\Accounts\Person;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<PostShare>
+ * @extends ServiceEntityRepository<Person>
  *
- * @method PostShare|null find($id, $lockMode = null, $lockVersion = null)
- * @method PostShare|null findOneBy(array $criteria, array $orderBy = null)
- * @method PostShare[]    findAll()
- * @method PostShare[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Person|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Person|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Person[]    findAll()
+ * @method Person[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PostShareRepository extends ServiceEntityRepository
+class PersonRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, PostShare::class);
+        parent::__construct($registry, Person::class);
     }
 
-    public function save(PostShare $entity, bool $flush = false): void
+    public function save(Person $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class PostShareRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(PostShare $entity, bool $flush = false): void
+    public function remove(Person $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class PostShareRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return PostShare[] Returns an array of PostShare objects
+//     * @return Person[] Returns an array of Person objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class PostShareRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?PostShare
+//    public function findOneBySomeField($value): ?Person
 //    {
 //        return $this->createQueryBuilder('p')
 //            ->andWhere('p.exampleField = :val')

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Chat;
 
-use App\Repository\MessageRepository;
+use App\Entity\Accounts\Member;
+use App\Repository\Chat\MessageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
