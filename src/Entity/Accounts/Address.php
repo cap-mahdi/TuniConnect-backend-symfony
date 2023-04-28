@@ -5,6 +5,7 @@ namespace App\Entity\Accounts;
 use App\Repository\Accounts\AddressRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
 class Address
@@ -12,6 +13,8 @@ class Address
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("member")]
+
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
