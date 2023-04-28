@@ -74,8 +74,6 @@ public function post(Request $request) : Response
 
         $member->setName("Aziz") ;
         $member->setPhone(558885544122) ;
-        $member->setEmail("aziz@gmail.com") ;
-        $member->setIsAdmin(0) ;
         $currentTime = new \DateTime();
         $member->setDateOfMembership( $currentTime) ;
 
