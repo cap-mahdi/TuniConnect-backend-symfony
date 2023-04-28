@@ -36,7 +36,7 @@ class UserController extends AbstractController
         return $this->json("User is added",);
         }
         catch (Exception $exception){
-            return $this->json($exception->getMessage(),200, ["Content-Type" => "application/json"]);
+            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
         }
     }
 
@@ -50,7 +50,7 @@ public function delete(Request $request,UserRepository $userRepository):Response
         return $this->json("deleted",200, ["Content-Type" => "application/json"]);
     }
     catch (Exception $exception){
-        return $this->json($exception->getMessage(),200, ["Content-Type" => "application/json"]);
+        return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
     }
 
 }
@@ -70,9 +70,34 @@ public function getUsers(Request $request,UserRepository $userRepository):Respon
       }
     }
     catch (Exception $exception){
-        return $this->json($exception->getMessage(),200, ["Content-Type" => "application/json"]);
+        return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
     }
 
+}
+
+#[Route("user/edit/{id}",name:"app_user_edit",methods:["PUT"])]
+public function editUser(Request $request,UserRepository $userRepository):Response
+{
+
+    try {
+        $idUser=$request->attributes->get("_route_params")["id"];
+        $user=$userRepository->find(intval($idUser));
+        if($request->query->has("email")){
+            $user->setEmail($request->query->get("email"));
+        }
+        if($request->query->has("password")&&$request->query->has("oldPassword")){
+            if($this->hasher->isPasswordValid($user,$request->query->get("oldPassword"))) {
+                $userRepository->upgradePassword($user, $this->hasher->hashPassword($request->query->get("password")));
+            }
+        }
+        $userRepository->save($user,true);
+        return $this->json($user,200, ["Content-Type" => "application/json"]);
+
+
+    }
+    catch (Exception $exception){
+        return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+    }
 }
 
 
