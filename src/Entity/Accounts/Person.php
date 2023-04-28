@@ -25,6 +25,7 @@ class Person
 
     protected ?string $name = null;
 
+
     #[ORM\Column(length: 100)]
     #[Groups("member")]
 
@@ -72,17 +73,7 @@ class Person
         return $this;
     }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
 
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
 
     public function getPhone(): ?int
     {
@@ -96,17 +87,6 @@ class Person
         return $this;
     }
 
-    public function isIsAdmin(): ?bool
-    {
-        return $this->isAdmin;
-    }
-
-    public function setIsAdmin(bool $isAdmin): self
-    {
-        $this->isAdmin = $isAdmin;
-
-        return $this;
-    }
 
     public function getAddress(): ?Address
     {
