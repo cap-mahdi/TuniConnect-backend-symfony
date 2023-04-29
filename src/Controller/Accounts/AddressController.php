@@ -24,54 +24,16 @@ class AddressController extends AbstractController
         name: 'address.list',
         methods: ['GET']
     )]
-    public function index(ManagerRegistry $doctrine): Response
+    public function getAddresses(Request $request, ManagerRegistry $doctrine): JsonResponse
     {
-        $repository = $doctrine->getRepository(Address::class);
-
-        $addresses = $repository->findAll();
-
-        $data = [];
-
-        foreach ($addresses as $address) {
-            $data[] = [
-                'id' => $address->getId(),
-                'street' => $address->getStreet(),
-                'city' => $address->getCity(),
-                'state' => $address->getState(),
-                'zipcode' => $address->getZipcode(),
-                'country' => $address->getCountry()
-            ];
-        }
-
-        return $this->json($data);
-    }
-
-    #[Route('/{id}',
-        name: 'address.details',
-        requirements: [
-            'id'=>'\d+'
-        ],
-        methods: ['GET']
-    )]
-    public function details(ManagerRegistry $doctrine, Request $request , $id): JsonResponse
-    {
-        $repository = $doctrine->getRepository(Address::class);
-        $address = $repository->find($id);
-        if($address)
+        try {
+            $queries = $request->query->all();
+            $repository= $doctrine->getRepository(Address::class);
+            $persons = $repository->findBy($queries);
+            return $this->json($persons , 200, ["Content-Type" => "application/json"]);
+        }catch (Exception $exception)
         {
-            $data[] = [
-                'id' => $address->getId(),
-                'street' => $address->getStreet(),
-                'city' => $address->getCity(),
-                'state' => $address->getState(),
-                'zipcode' => $address->getZipcode(),
-                'country' => $address->getCountry()
-            ];
-            return $this->json($data);
-        }
-        else
-        {
-            return $this->json("the address does not exist");
+            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
         }
     }
 
@@ -84,12 +46,14 @@ class AddressController extends AbstractController
     {
         $entityManager = $doctrine->getManager();
 
+
+        $content = json_decode($request->getContent());
         $address =  new Address();
-        $address->setCountry($request->request->get('country'));
-        $address->setState($request->request->get('state'));
-        $address->setCity($request->request->get('city'));
-        $address->setStreet($request->request->get('street'));
-        $address->setZipcode($request->request->get('zipcode'));
+        $address->setCountry($content->country);
+        $address->setState($content->state);
+        $address->setCity($content->city);
+        $address->setStreet($content->street);
+        $address->setZipcode($content->zipcode);
         $entityManager->persist($address);
         $entityManager->flush();
 
@@ -110,11 +74,13 @@ class AddressController extends AbstractController
         {
             return $this->json("the address does not exist");
         }
-        $address->setCountry($request->request->get('country'));
-        $address->setState($request->request->get('state'));
-        $address->setCity($request->request->get('city'));
-        $address->setStreet($request->request->get('street'));
-        $address->setZipcode($request->request->get('zipcode'));
+        $content = json_decode($request->getContent());
+        $address =  new Address();
+        $address->setCountry($content->country);
+        $address->setState($content->state);
+        $address->setCity($content->city);
+        $address->setStreet($content->street);
+        $address->setZipcode($content->zipcode);
         $manager = $doctrine->getManager();
         $manager->persist($address);
         $manager->flush();
@@ -130,7 +96,7 @@ class AddressController extends AbstractController
         ],
         methods: ['DELETE']
     )]
-    public function delete(Address $address = null, ManagerRegistry $doctrine): JsonResponse
+    public function delete( ManagerRegistry $doctrine ,Address $address = null): JsonResponse
     {
         if(!$address)
         {
