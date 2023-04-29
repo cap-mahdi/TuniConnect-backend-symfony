@@ -1,26 +1,20 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Chat;
 
-use App\Entity\Account;
-use App\Entity\Address;
-use App\Entity\Member;
-use App\Entity\Message;
-use App\Entity\Person;
-use App\Repository\MemberRepository;
-use DeepCopy\f001\A;
+use App\Entity\Accounts\Member;
+use App\Entity\Chat\Message;
 use Doctrine\Persistence\ManagerRegistry;
-use phpDocumentor\Reflection\Types\This;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use function Sodium\add;
+
 
 #[Route("message")]
 class MessageController extends AbstractController
 {
-    #[Route('/send/{id<\d+>}', name: 'message.send',methods: "POST")]
+    /*#[Route('/send/{id<\d+>}', name: 'message.send',methods: "POST")]
     public function sendMessage(Request $request,ManagerRegistry $doctrine, Member $receiver = null ): Response
     {
         $info = $request->request;
@@ -53,7 +47,7 @@ class MessageController extends AbstractController
         $manager->flush();
 
         return $this->json($message->display(),201);
-    }
+    }*/
     #[Route('/delete/{id<\d+>}', name: 'message.delete', methods: "DELETE")]
     public function deleteMessage(ManagerRegistry $doctrine,Message $message = null): Response{
         if(!$message){
@@ -66,7 +60,7 @@ class MessageController extends AbstractController
             return $this->json("The message has been deleted",200);
         }
     }
-    #[Route('/get/{id1<\d+>}/{id2<\d+>}', name: 'messages.get', methods: "GET")]
+    /*#[Route('/get/{id1<\d+>}/{id2<\d+>}', name: 'messages.get', methods: "GET")]
     public function getMessages(Request $request,ManagerRegistry $doctrine,$id1,$id2): Response{
         $memberRepository = $doctrine->getRepository(Member::class);
         $requestedUser = $memberRepository->findBy([
@@ -87,8 +81,8 @@ class MessageController extends AbstractController
         return $this->json(array_map(function ($message){
             return $message->display();
         },$messages),200);
-    }
-    #[Route('/update/{id<\d+>}', name: 'message.update', methods: "PATCH")]
+    }*/
+    /*#[Route('/update/{id<\d+>}', name: 'message.update', methods: "PATCH")]
     public function updateMessage(Request $request,ManagerRegistry $doctrine,Message $message = null): Response{
         $manager = $doctrine->getManager();
         if(!$message){
@@ -104,6 +98,6 @@ class MessageController extends AbstractController
 
         return $this->json("message updated successfully",200);
 
-    }
+    }*/
 }
 
