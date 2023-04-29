@@ -33,7 +33,7 @@ class PostController extends AbstractController
                 [AbstractNormalizer::GROUPS => 'Post:Post']);
             return new JsonResponse($data, 200, [], true);
         } catch (\Exception $exception) {
-            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+            return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
     }
 
@@ -47,7 +47,7 @@ class PostController extends AbstractController
                 [AbstractNormalizer::GROUPS => 'Post:Get']);
             return new JsonResponse($data, 200, [], true);
         } catch (\Exception $exception) {
-            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+            return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
     }
 
@@ -66,7 +66,27 @@ class PostController extends AbstractController
                 [AbstractNormalizer::GROUPS => 'Post:Get']);
             return new JsonResponse($data, 200, [], true);
         } catch (\Exception $exception) {
-            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+            return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
+        }
+
+    }
+
+    #[Route('/find', name: 'post.get_by_poster', methods:['GET'])]
+    public function getByPoster(Request $request, PostRepository $postRepository,SerializerInterface $serializer): Response
+    {
+        try {
+            $poster_id = $request->query->get('poster_id');
+            $posts = $postRepository->findBy(['poster' => $poster_id]);
+
+            if (!$posts) {
+                return new JsonResponse(['error' => 'Post not found'], 404);
+            }
+            $data = $serializer->serialize($posts,
+                JsonEncoder::FORMAT,
+                [AbstractNormalizer::GROUPS => 'Post:Get']);
+            return new JsonResponse($data, 200, [], true);
+        } catch (\Exception $exception) {
+            return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
 
     }
@@ -79,14 +99,14 @@ class PostController extends AbstractController
             $post = $postRepository->find($id);
             $data = json_decode($request->getContent(), true);
             $post->setText($data['text']);
-            $post->setDate(new \DateTime());
+            $post->setUpdatedAt(new \DateTime());
             $postRepository->save($post, true);
             $data = $serializer->serialize($post,
                 JsonEncoder::FORMAT,
                 [AbstractNormalizer::GROUPS => 'Post:Get']);
             return new JsonResponse($data, 200, [], true);
         } catch (\Exception $exception) {
-            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+            return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
 
     }
@@ -100,7 +120,7 @@ class PostController extends AbstractController
             $postRepository->remove($post, true);
             return new JsonResponse("Post deleted successfully");
         } catch (\Exception $exception) {
-            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+            return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
     }
 
@@ -125,7 +145,7 @@ class PostController extends AbstractController
                 [AbstractNormalizer::GROUPS => 'Post:Get']);
             return new JsonResponse($data, 200, [], true);
         } catch (\Exception $exception) {
-            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+            return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
     }
 }

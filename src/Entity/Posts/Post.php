@@ -48,14 +48,18 @@ class Post
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups("Post:Get")]
-    private ?\DateTimeInterface $date;
+    private ?\DateTimeInterface $createdAt;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups("Post:Get")]
+    private ?\DateTimeInterface $updatedAt;
 
 
 
     public function __construct()
     {
         $this->memberLikes = new ArrayCollection();
-        $this->date = new \DateTime();
+        $this->createdAt = new \DateTime();
     }
 
 
@@ -139,15 +143,19 @@ class Post
     }
 
 
-
-    public function getDate(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
-        return $this->date;
+        return $this->createdAt;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
-        $this->date = $date;
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
