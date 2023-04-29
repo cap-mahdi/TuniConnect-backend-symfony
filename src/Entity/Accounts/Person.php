@@ -16,8 +16,7 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("member")]
-
+    #[Groups(["Message:POST"])]
     protected ?int $id = null;
 
     #[ORM\Column(length: 50)]
