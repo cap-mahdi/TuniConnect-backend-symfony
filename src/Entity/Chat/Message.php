@@ -31,6 +31,7 @@ class Message
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
+
     public function __construct()
     {
         $this->receivers = new ArrayCollection();
@@ -95,6 +96,8 @@ class Message
 
         return $this;
     }
+
+
 
 
 }

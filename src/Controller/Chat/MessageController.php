@@ -2,19 +2,22 @@
 
 namespace App\Controller\Chat;
 
+use App\Entity\Accounts\Address;
 use App\Entity\Accounts\Member;
 use App\Entity\Chat\Message;
+use App\Entity\Accounts\Person;
+use App\Repository\Accounts\MemberRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use phpDocumentor\Reflection\Types\This;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 #[Route("message")]
 class MessageController extends AbstractController
 {
-    /*#[Route('/send/{id<\d+>}', name: 'message.send',methods: "POST")]
+    #[Route('/send/{id<\d+>}', name: 'message.send',methods: "POST")]
     public function sendMessage(Request $request,ManagerRegistry $doctrine, Member $receiver = null ): Response
     {
         $info = $request->request;
@@ -46,8 +49,9 @@ class MessageController extends AbstractController
 
         $manager->flush();
 
-        return $this->json($message->display(),201);
-    }*/
+       // return $this->json($message->display(),201);
+        return new Response () ;
+    }
     #[Route('/delete/{id<\d+>}', name: 'message.delete', methods: "DELETE")]
     public function deleteMessage(ManagerRegistry $doctrine,Message $message = null): Response{
         if(!$message){
@@ -60,7 +64,7 @@ class MessageController extends AbstractController
             return $this->json("The message has been deleted",200);
         }
     }
-    /*#[Route('/get/{id1<\d+>}/{id2<\d+>}', name: 'messages.get', methods: "GET")]
+    #[Route('/get/{id1<\d+>}/{id2<\d+>}', name: 'messages.get', methods: "GET")]
     public function getMessages(Request $request,ManagerRegistry $doctrine,$id1,$id2): Response{
         $memberRepository = $doctrine->getRepository(Member::class);
         $requestedUser = $memberRepository->findBy([
@@ -77,20 +81,21 @@ class MessageController extends AbstractController
             return $this->json("User cannot send message to himself",400);
 
         $messageRepository = $doctrine->getRepository(Message::class);
-        $messages = $messageRepository->getConversation($id1,$id2);
-        return $this->json(array_map(function ($message){
-            return $message->display();
-        },$messages),200);
-    }*/
-    /*#[Route('/update/{id<\d+>}', name: 'message.update', methods: "PATCH")]
+      //  $messages = $messageRepository->getConversation($id1,$id2);
+     //   return $this->json(array_map(function ($message){
+       //     return $message->display();
+      //  },$messages),200);
+        return new Response() ;
+    }
+    #[Route('/update/{id<\d+>}', name: 'message.update', methods: "PATCH")]
     public function updateMessage(Request $request,ManagerRegistry $doctrine,Message $message = null): Response{
         $manager = $doctrine->getManager();
         if(!$message){
             return $this->json('message not found',404);
         }
         $body = $request->request->get("body");
-        if(!$message->isEdited())
-            $message->setIsEdited(true);
+      //  if(!$message->isEdited())
+       //     $message->setIsEdited(true);
         $message->setBody($body);
 
         $manager->persist($message);
@@ -98,6 +103,6 @@ class MessageController extends AbstractController
 
         return $this->json("message updated successfully",200);
 
-    }*/
+    }
 }
 
