@@ -33,7 +33,9 @@ class UserController extends AbstractController
         }
         $user->setPassword($this->hasher->hashPassword($user,$data["password"]));
         $userRepository->save($user,true);
-        return $this->json("User is added",);
+        $id = $user->getId() ;
+        $data = ["id"=>$id] ;
+        return $this->json($data,);
         }
         catch (Exception $exception){
             return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);

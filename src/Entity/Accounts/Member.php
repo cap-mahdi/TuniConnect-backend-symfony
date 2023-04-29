@@ -36,7 +36,7 @@ class Member extends Person
     private Collection $sharedPost;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups("member")]
+    #[Groups(["Member:Post" , "Member:Get" ])]
     private ?\DateTimeInterface $dateOfMembership = null;
 
 
