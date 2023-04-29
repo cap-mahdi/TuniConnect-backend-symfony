@@ -1,21 +1,18 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Chat;
 
-use App\Entity\Account;
-use App\Entity\Address;
-use App\Entity\Member;
-use App\Entity\Message;
-use App\Entity\Person;
-use App\Repository\MemberRepository;
-use DeepCopy\f001\A;
+use App\Entity\Accounts\Address;
+use App\Entity\Accounts\Member;
+use App\Entity\Chat\Message;
+use App\Entity\Accounts\Person;
+use App\Repository\Accounts\MemberRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use phpDocumentor\Reflection\Types\This;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use function Sodium\add;
 
 #[Route("message")]
 class MessageController extends AbstractController
@@ -52,7 +49,8 @@ class MessageController extends AbstractController
 
         $manager->flush();
 
-        return $this->json($message->display(),201);
+       // return $this->json($message->display(),201);
+        return new Response () ;
     }
     #[Route('/delete/{id<\d+>}', name: 'message.delete', methods: "DELETE")]
     public function deleteMessage(ManagerRegistry $doctrine,Message $message = null): Response{
@@ -83,10 +81,11 @@ class MessageController extends AbstractController
             return $this->json("User cannot send message to himself",400);
 
         $messageRepository = $doctrine->getRepository(Message::class);
-        $messages = $messageRepository->getConversation($id1,$id2);
-        return $this->json(array_map(function ($message){
-            return $message->display();
-        },$messages),200);
+      //  $messages = $messageRepository->getConversation($id1,$id2);
+     //   return $this->json(array_map(function ($message){
+       //     return $message->display();
+      //  },$messages),200);
+        return new Response() ;
     }
     #[Route('/update/{id<\d+>}', name: 'message.update', methods: "PATCH")]
     public function updateMessage(Request $request,ManagerRegistry $doctrine,Message $message = null): Response{
@@ -95,8 +94,8 @@ class MessageController extends AbstractController
             return $this->json('message not found',404);
         }
         $body = $request->request->get("body");
-        if(!$message->isEdited())
-            $message->setIsEdited(true);
+      //  if(!$message->isEdited())
+       //     $message->setIsEdited(true);
         $message->setBody($body);
 
         $manager->persist($message);
