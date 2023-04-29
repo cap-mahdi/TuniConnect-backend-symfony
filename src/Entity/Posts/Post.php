@@ -8,8 +8,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use PHPUnit\Framework\Attributes\Group;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Ignore;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
+
 class Post
 {
     #[ORM\Id]
@@ -21,13 +28,14 @@ class Post
     private ?string $text = null;
 
     #[ORM\Column]
-    private ?int $totalLikes = null;
+    private ?int $totalLikes = 0;
 
     #[ORM\Column]
-    private ?int $totalShares = null;
+    private ?int $totalShares = 0;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]
+    #[MaxDepth(1)]
     private ?Member $poster = null;
 
 
@@ -39,14 +47,14 @@ class Post
 
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date = null;
+    private ?\DateTimeInterface $date;
 
 
 
     public function __construct()
     {
         $this->memberLikes = new ArrayCollection();
-
+        $this->date = new \DateTime();
     }
 
 
@@ -90,6 +98,7 @@ class Post
 
         return $this;
     }
+    #[Ignore]
 
     public function getPoster(): ?Member
     {
