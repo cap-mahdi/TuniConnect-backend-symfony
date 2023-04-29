@@ -26,7 +26,8 @@ class PostController extends AbstractController
             $poster->addPost($post);
             $postRepository->save($post, true);
             return $this->json("Post added successfully");
-        } catch (Exception $exception) {
+        }
+        catch (Exception $exception) {
             return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
     }
