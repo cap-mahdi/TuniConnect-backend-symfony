@@ -35,7 +35,7 @@ class UserController extends AbstractController
         $userRepository->save($user,true);
         $id = $user->getId() ;
         $data = ["id"=>$id] ;
-        return $this->json($data,);
+        return $this->json($data,201);
         }
         catch (Exception $exception){
             return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);

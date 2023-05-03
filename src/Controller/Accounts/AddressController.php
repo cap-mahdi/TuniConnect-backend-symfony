@@ -57,7 +57,9 @@ class AddressController extends AbstractController
         $entityManager->persist($address);
         $entityManager->flush();
 
-        return $this->json('Created new project successfully with id ' . $address->getId());
+        $id = $address->getId() ;
+        $data = ["id"=>$id] ;
+        return $this->json($data,201);
     }
 
 
