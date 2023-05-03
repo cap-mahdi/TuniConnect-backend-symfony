@@ -8,12 +8,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use PHPUnit\Framework\Attributes\Group;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\Ignore;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
-use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 
@@ -22,20 +18,24 @@ class Post
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("Post:Get")]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(["Post:Get", "Post:Post"])]
     private ?string $text = null;
 
     #[ORM\Column]
+    #[Groups("Post:Get")]
     private ?int $totalLikes = 0;
 
     #[ORM\Column]
+    #[Groups("Post:Get")]
     private ?int $totalShares = 0;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]
-    #[MaxDepth(1)]
+    #[Groups(["Post:Get", "Post:Post"])]
     private ?Member $poster = null;
 
 
@@ -47,14 +47,19 @@ class Post
 
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date;
+    #[Groups("Post:Get")]
+    private ?\DateTimeInterface $createdAt;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups("Post:Get")]
+    private ?\DateTimeInterface $updatedAt;
 
 
 
     public function __construct()
     {
         $this->memberLikes = new ArrayCollection();
-        $this->date = new \DateTime();
+        $this->createdAt = new \DateTime();
     }
 
 
@@ -98,7 +103,6 @@ class Post
 
         return $this;
     }
-    #[Ignore]
 
     public function getPoster(): ?Member
     {
@@ -139,15 +143,19 @@ class Post
     }
 
 
-
-    public function getDate(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
-        return $this->date;
+        return $this->createdAt;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
-        $this->date = $date;
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

@@ -16,8 +16,12 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+<<<<<<< HEAD
     #[Groups(["Member:Post" , "Member:Get" ])]
 
+=======
+    #[Groups(["member", "Post:Get", "Post:Post" ])]
+>>>>>>> chaima
     protected ?int $id = null;
 
     #[ORM\Column(length: 50)]
