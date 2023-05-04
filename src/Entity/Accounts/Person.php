@@ -16,7 +16,7 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["Member:Post" , "Member:Get" ])]
+    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post" ])]
 
     protected ?int $id = null;
 
