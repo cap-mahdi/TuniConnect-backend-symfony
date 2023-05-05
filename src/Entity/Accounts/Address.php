@@ -13,23 +13,30 @@ class Address
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("member")]
+    #[Groups(["Member:Post" , "Member:Get" ])]
 
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(["Member:Post" ])]
+
     private ?string $street = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(["Member:Post" ])]
+
     private ?string $city = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(["Member:Post" ])]
     private ?string $state = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
+    #[Groups(["Member:Post" ])]
     private ?int $zipcode = null;
 
     #[ORM\Column(length: 30)]
+    #[Groups(["Member:Post" ])]
     private ?string $country = null;
 
     public function getId(): ?int

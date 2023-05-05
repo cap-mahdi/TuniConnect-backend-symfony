@@ -17,7 +17,7 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("member")]
+    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post" ])]
 
     protected ?int $id = null;
 
@@ -31,14 +31,14 @@ class Person
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups("member")]
+    #[Groups(["Member:Post" , "Member:Get" ])]
 
     protected ?Address $address = null;
 
 
     #[ORM\OneToOne(inversedBy: 'person', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups("member")]
+    #[Groups(["Member:Post" , "Member:Get" ])]
 
     protected ?User $user = null;
 

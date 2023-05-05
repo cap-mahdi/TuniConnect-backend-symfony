@@ -8,101 +8,101 @@ use App\Entity\Chat\Message;
 use App\Entity\Accounts\Person;
 use App\Repository\Accounts\MemberRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use phpDocumentor\Reflection\Types\This;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route("message")]
 class MessageController extends AbstractController
 {
-    #[Route('/send/{id<\d+>}', name: 'message.send',methods: "POST")]
-    public function sendMessage(Request $request,ManagerRegistry $doctrine, Member $receiver = null ): Response
+    #[Route('/add/{id<\d+>}', name: 'message.send',methods: "POST")]
+    public function sendMessage(Request $request,ManagerRegistry $doctrine,SerializerInterface $serializer, Member $receiver = null ): Response
     {
-        $info = $request->request;
-        //if receiver do not exist
-        if(!$receiver)
-            return $this->json("Receiver do not exist",404);
+        try {
+            $info =  json_decode($request->getContent(), true);
 
-        //search the sender
-        $manager = $doctrine->getManager();
-        $memberRepository = $doctrine->getRepository(Member::class);
-        $sender = $memberRepository->find([
-            "id"=>$info->get("id")
-        ]);
-        //if sender do not exist
-        if(!$sender)
-            return $this->json("Sender do not exist",404);
+            if(!$receiver)
+                return new JsonResponse("Receiver do not exist",404);
 
-        //if sender == receiver
-        if($sender == $receiver)
-            return $this->json("You cannot send message to yourself",400);
+            $manager = $doctrine->getManager();
+            $memberRepository = $doctrine->getRepository(Member::class);
+            $sender = $memberRepository->find($info["sender"]["id"]);
 
-        //creating the message
-        $message = new Message();
-        $message->setSender($sender);
-        $message->setBody($info->get("body"));
-        $message->addReceiver($receiver);
+            if(!$sender)
+                return new JsonResponse("Sender do not exist",404);
 
-        $manager->persist($message);
+            if($sender == $receiver)
+                return new JsonResponse("You cannot send message to yourself",400);
 
-        $manager->flush();
+            $message = new Message();
+            $message->setSender($sender);
+            $message->setBody($info["body"]);
+            $message->addReceiver($receiver);
 
-       // return $this->json($message->display(),201);
-        return new Response () ;
+            $manager->persist($message);
+
+            $manager->flush();
+           $data = $serializer->serialize($message ,
+                JsonEncoder::FORMAT,
+                [AbstractNormalizer::GROUPS => ['Message:POST']]);
+            return new JsonResponse($data,201,[],true);
+        }catch(\Exception $exception){
+            return new JsonResponse($exception->getMessage(),500);
+        }
+
     }
     #[Route('/delete/{id<\d+>}', name: 'message.delete', methods: "DELETE")]
     public function deleteMessage(ManagerRegistry $doctrine,Message $message = null): Response{
-        if(!$message){
-            return $this->json("The message do not exist",404);
-        }else{
-            $manager = $doctrine->getManager();
-            $manager->remove($message);
+        try{
+            if(!$message){
+                return $this->json("The message do not exist",404);
+            }else{
+                $manager = $doctrine->getManager();
+                $manager->remove($message);
 
-            $manager->flush();
-            return $this->json("The message has been deleted",200);
+                $manager->flush();
+                return $this->json("The message has been deleted",200);
+            }
+        }catch(\Exception $exception){
+            return new JsonResponse($exception->getMessage(),500);
         }
-    }
-    #[Route('/get/{id1<\d+>}/{id2<\d+>}', name: 'messages.get', methods: "GET")]
-    public function getMessages(Request $request,ManagerRegistry $doctrine,$id1,$id2): Response{
-        $memberRepository = $doctrine->getRepository(Member::class);
-        $requestedUser = $memberRepository->findBy([
-            "id" => $id1
-        ]);
-        if(!$requestedUser)
-            return $this->json("Receiver do not exist ",404);
-        $currentUser = $memberRepository->findBy([
-            "id" => $id2
-        ]);
-        if(!$currentUser)
-            return $this->json("Current uesr do not exist ",404);
-        if($currentUser == $requestedUser)
-            return $this->json("User cannot send message to himself",400);
 
-        $messageRepository = $doctrine->getRepository(Message::class);
-      //  $messages = $messageRepository->getConversation($id1,$id2);
-     //   return $this->json(array_map(function ($message){
-       //     return $message->display();
-      //  },$messages),200);
-        return new Response() ;
     }
-    #[Route('/update/{id<\d+>}', name: 'message.update', methods: "PATCH")]
-    public function updateMessage(Request $request,ManagerRegistry $doctrine,Message $message = null): Response{
-        $manager = $doctrine->getManager();
-        if(!$message){
-            return $this->json('message not found',404);
+    #[Route('/get', name: 'message.get.conversation', methods: "GET")]
+    public function getMessages(Request $request,ManagerRegistry $doctrine,SerializerInterface $serializer): Response{
+        try{
+            $info =  json_decode($request->getContent(), true);
+            $memberRepository = $doctrine->getRepository(Member::class);
+            $receiverId = $info["receiver"];
+            $senderId = $info["sender"]    ;
+            $requestedUser = $memberRepository->find($receiverId);
+            if(!$requestedUser)
+                return $this->json("Receiver do not exist ",404);
+            $currentUser = $memberRepository->find($senderId);
+            if(!$currentUser)
+                return $this->json("Current uesr do not exist ",404);
+            if($currentUser == $requestedUser)
+                return $this->json("User cannot send message to himself",400);
+
+            $messageRepository = $doctrine->getRepository(Message::class);
+            $messages = $messageRepository->findConversation($receiverId,$senderId);
+            $data = $serializer->serialize($messages ,
+                JsonEncoder::FORMAT,
+                [AbstractNormalizer::GROUPS => ['Message:POST']]);
+            return new JsonResponse($data,200,[],true);
+        }catch (\Exception $exception){
+            return new JsonResponse($exception->getMessage(),500);
         }
-        $body = $request->request->get("body");
-      //  if(!$message->isEdited())
-       //     $message->setIsEdited(true);
-        $message->setBody($body);
 
-        $manager->persist($message);
-        $manager->flush();
-
-        return $this->json("message updated successfully",200);
 
     }
+
+
 }
 

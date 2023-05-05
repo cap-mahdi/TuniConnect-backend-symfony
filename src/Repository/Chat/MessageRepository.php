@@ -38,6 +38,20 @@ class MessageRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+    public function findConversation($id1,$id2): Array {
+        return $this->createQueryBuilder('m')
+                    ->innerJoin("m.receivers","mr")
+                    ->andWhere("mr.id = :id1 or mr.id= :id2")
+                    ->andWhere("m.sender = :id1 or m.sender= :id2")
+                    ->setParameters([
+                        "id1" => $id1,
+                        "id2" => $id2
+                    ])
+                    ->orderBy("m.date","ASC")
+                    ->getQuery()
+                    ->getResult();
+    }
+
 
 //    /**
 //     * @return Message[] Returns an array of Message objects
