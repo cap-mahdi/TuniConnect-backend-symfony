@@ -93,14 +93,24 @@ public function post(Request $request) : Response
         $currentTime = new \DateTime();
         $member->setDateOfMembership( $currentTime) ;
 
-        ////MUST CHANGE INTO ADDING A NEW ADDRESS
-        $address = $doctrine->getRepository(Address::class)->find(1) ;
-        $member->setAddress($address) ;
+        //// ADDING A NEW ADDRESS
 
-        ////MUST CHANGE INTO ADDING A NEW MEMBER
+
+            $bodyAddress = $body["address"] ;
+            $bodyAddress = json_encode($bodyAddress) ;
+        $subRequestAddress = Request::create('/address/add', 'POST', [], [], [], [], $bodyAddress);
+            $responseAddressJSON = $this->httpKernel->handle($subRequestAddress, HttpKernelInterface::SUB_REQUEST);
+            $responseAddress =  json_decode($responseAddressJSON->getContent(), true);
+            $addressId = $responseAddress["id"] ;
+
+            $address = $doctrine->getRepository(Address::class)->find($addressId) ;
+            $member->setAddress($address) ;
+
+
+        ////ADDING A NEW MEMBER
 
             $bodyUser = $body["user"] ;
-            $bodyUser = ["email"=>$bodyUser["email"] , "password"=>$bodyUser["password"]];
+                    //$bodyUser = ["email"=>$bodyUser["email"] , "password"=>$bodyUser["password"]];
             $bodyUser = json_encode($bodyUser) ;
 
             $subRequestUser = Request::create('/user/add', 'POST', [], [], [], [], $bodyUser);
@@ -112,7 +122,8 @@ public function post(Request $request) : Response
 
             $userId = $responseUser["id"] ;
 
-            $user = $doctrine->getRepository(User::class)->find($userId) ;$member->setUser($user );
+            $user = $doctrine->getRepository(User::class)->find($userId) ;
+            $member->setUser($user );
         //SAVE MEMBER
         $entityManager->persist($member);
         $entityManager->flush();
