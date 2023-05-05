@@ -26,7 +26,8 @@ class AddressController extends AbstractController
     )]
     public function getAddresses(Request $request, ManagerRegistry $doctrine): JsonResponse
     {
-        try {
+        try
+        {
             $queries = $request->query->all();
             $repository= $doctrine->getRepository(Address::class);
             $persons = $repository->findBy($queries);

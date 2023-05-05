@@ -27,34 +27,18 @@ class Post
     #[ORM\Column(type: Types::TEXT)]
     private ?string $text = null;
 
-    #[ORM\Column]
-    private ?int $totalLikes = 0;
-
-    #[ORM\Column]
-    private ?int $totalShares = 0;
-
-    #[ORM\ManyToOne(inversedBy: 'posts')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[MaxDepth(1)]
-    private ?Member $poster = null;
+    #[ORM\Column(type: Types::ARRAY, nullable: true)]
+    private array $photos = [];
 
 
 
-    #[ORM\ManyToMany(targetEntity: Member::class)]
-    #[ORM\JoinTable(name: 'post_likes')]
-    private Collection $memberLikes;
 
-
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $date;
 
 
 
     public function __construct()
     {
-        $this->memberLikes = new ArrayCollection();
-        $this->date = new \DateTime();
+
     }
 
 
@@ -75,85 +59,17 @@ class Post
         return $this;
     }
 
-    public function getTotalLikes(): ?int
+    public function getPhotos(): array
     {
-        return $this->totalLikes;
+        return $this->photos;
     }
 
-    public function setTotalLikes(int $totalLikes): self
+    public function setPhotos(?array $photos): self
     {
-        $this->totalLikes = $totalLikes;
+        $this->photos = $photos;
 
         return $this;
     }
-
-    public function getTotalShares(): ?int
-    {
-        return $this->totalShares;
-    }
-
-    public function setTotalShares(int $totalShares): self
-    {
-        $this->totalShares = $totalShares;
-
-        return $this;
-    }
-    #[Ignore]
-
-    public function getPoster(): ?Member
-    {
-        return $this->poster;
-    }
-
-    public function setPoster(?Member $poster): self
-    {
-        $this->poster = $poster;
-
-        return $this;
-    }
-
-
-
-    /**
-     * @return Collection<int, Member>
-     */
-    public function getMemberLikes(): Collection
-    {
-        return $this->memberLikes;
-    }
-
-    public function addMemberLike(Member $memberLike): self
-    {
-        if (!$this->memberLikes->contains($memberLike)) {
-            $this->memberLikes->add($memberLike);
-        }
-
-        return $this;
-    }
-
-    public function removeMemberLike(Member $memberLike): self
-    {
-        $this->memberLikes->removeElement($memberLike);
-
-        return $this;
-    }
-
-
-
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
-
-    public function setDate(\DateTimeInterface $date): self
-    {
-        $this->date = $date;
-
-        return $this;
-    }
-
-
-
 
 
 }

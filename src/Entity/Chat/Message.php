@@ -24,17 +24,18 @@ class Message
     #[ORM\JoinColumn(nullable: false)]
     private ?Member $sender = null;
 
-    #[ORM\ManyToMany(targetEntity: Member::class, inversedBy: 'messagesReceived')]
-    #[ORM\JoinTable(name: 'messages_receiver')]
-    private Collection $receivers;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
+    #[ORM\ManyToOne(inversedBy: 'messages')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Room $room = null;
+
 
     public function __construct()
     {
-        $this->receivers = new ArrayCollection();
+
     }
 
     public function getBody(): ?string
@@ -61,29 +62,6 @@ class Message
         return $this;
     }
 
-    /**
-     * @return Collection<int, Member>
-     */
-    public function getReceivers(): Collection
-    {
-        return $this->receivers;
-    }
-
-    public function addReceiver(Member $receiver): self
-    {
-        if (!$this->receivers->contains($receiver)) {
-            $this->receivers->add($receiver);
-        }
-
-        return $this;
-    }
-
-    public function removeReceiver(Member $receiver): self
-    {
-        $this->receivers->removeElement($receiver);
-
-        return $this;
-    }
 
     public function getDate(): ?\DateTimeInterface
     {
@@ -97,7 +75,16 @@ class Message
         return $this;
     }
 
+    public function getRoom(): ?Room
+    {
+        return $this->room;
+    }
 
+    public function setRoom(?Room $room): self
+    {
+        $this->room = $room;
 
+        return $this;
+    }
 
 }
