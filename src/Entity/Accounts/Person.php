@@ -44,11 +44,11 @@ class Person
 
 
     #[ORM\Column(length: 50)]
-    #[Groups(['Cov:POST', 'Cov:GET'])]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     protected ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['Cov:POST', 'Cov:GET'])]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     protected ?string $lastName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]

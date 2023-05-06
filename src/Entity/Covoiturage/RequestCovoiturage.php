@@ -5,6 +5,7 @@ namespace App\Entity\Covoiturage;
 use App\Entity\Accounts\Member;
 use App\Repository\Covoiturage\RequestCovoiturageRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RequestCovoiturageRepository::class)]
 class RequestCovoiturage
@@ -12,17 +13,21 @@ class RequestCovoiturage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['ReqCov: POST'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 20)]
-    private ?string $status = null;
+    #[Groups(['ReqCov: POST'])]
+    private ?string $status = 'pending';
 
     #[ORM\ManyToOne(inversedBy: 'requestCovoiturageSent')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['ReqCov: POST'])]
     private ?Member $sender = null;
 
     #[ORM\ManyToOne(inversedBy: 'requestCovoiturages')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['ReqCov: POST'])]
     private ?Covoiturage $covoiturage = null;
 
     public function getId(): ?int
