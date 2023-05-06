@@ -5,6 +5,7 @@ namespace App\Controller\Covoiturage;
 use App\Entity\Covoiturage\Covoiturage;
 use App\Repository\Accounts\MemberRepository;
 use App\Repository\Covoiturage\CovoiturageRepository;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,6 +32,7 @@ class CovoiturageController extends AbstractController
             $cov->setPrice($data['price']);
             $cov->setDescription($data['description']);
             $cov->setCreatedAt(new \DateTimeImmutable());
+            $driver->addCovoiturage($cov);
 
             $covoiturageRepository->save($cov, true);
             $data = $serializer->serialize($cov ,
@@ -38,8 +40,8 @@ class CovoiturageController extends AbstractController
                 [AbstractNormalizer::GROUPS => ['Cov:POST']]);
             return new JsonResponse($data,Response::HTTP_CREATED,[],true);
 
-        } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(),  $e->getCode(), [], true);
+        } catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(),  $e->getStatusCode(), [], true);
         }
 
     }
@@ -52,8 +54,8 @@ class CovoiturageController extends AbstractController
                 JsonEncoder::FORMAT,
                 [AbstractNormalizer::GROUPS => ['Cov:GET']]);
             return new JsonResponse($data,Response::HTTP_OK,[],true);
-        } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(),  $e->getCode(), [], true);
+        } catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(),  $e->getStatusCode(), [], true);
         }
     }
 
@@ -65,8 +67,8 @@ class CovoiturageController extends AbstractController
                 JsonEncoder::FORMAT,
                 [AbstractNormalizer::GROUPS => ['Cov:GET']]);
             return new JsonResponse($data,Response::HTTP_OK,[],true);
-        } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(),  $e->getCode(), [], true);
+        } catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(),  $e->getStatusCode(), [], true);
         }
     }
 
@@ -79,8 +81,8 @@ class CovoiturageController extends AbstractController
                 JsonEncoder::FORMAT,
                 [AbstractNormalizer::GROUPS => ['Cov:GET']]);
             return new JsonResponse($data,Response::HTTP_OK,[],true);
-        } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(),  $e->getCode(), [], true);
+        } catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(),  $e->getStatusCode(), [], true);
         }
     }
 
@@ -104,18 +106,19 @@ class CovoiturageController extends AbstractController
                 JsonEncoder::FORMAT,
                 [AbstractNormalizer::GROUPS => ['Cov:GET']]);
             return new JsonResponse($data,Response::HTTP_OK,[],true);
-        } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode(), [], true);
+        } catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
 
     #[Route('/delete', name: 'covoi.delete', methods: ['DELETE'])]
     public function delete(Request $request, CovoiturageRepository $repository): JsonResponse {
         try {
-            $repository->remove($repository->find($request->query->get('id')), true);
+            $cov = $repository->find($request->query->get('id'));
+            $repository->remove($cov, true);
             return $this->json("covoiturage deleted successfully",200);
-        } catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), $e->getCode(), [], true);
+        } catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
 

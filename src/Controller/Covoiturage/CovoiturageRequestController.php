@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -32,8 +33,8 @@ class CovoiturageRequestController extends AbstractController
             $data = $serializer->serialize($req, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
 
-        }catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), 500, [], true);
+        }catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
 
@@ -43,8 +44,8 @@ class CovoiturageRequestController extends AbstractController
             $reqs = $repository->findAll();
             $data = $serializer->serialize($reqs, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
-        }catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), 500, [], true);
+        }catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
     #[Route('/covoiturage', name: 'req.findByCov', methods: ['GET'])]
@@ -54,8 +55,8 @@ class CovoiturageRequestController extends AbstractController
             $reqs = $repository->findBy(['covoiturage' => $cov]);
             $data = $serializer->serialize($reqs, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
-        }catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), 500, [], true);
+        }catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
     #[Route('/sender', name: 'req.findBySender', methods: ['GET'])]
@@ -65,8 +66,8 @@ class CovoiturageRequestController extends AbstractController
             $reqs = $repository->findBy(['sender' => $sender]);
             $data = $serializer->serialize($reqs, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
-        }catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), 500, [], true);
+        }catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
     #[Route('/request', name: 'req.findByID', methods: ['GET'])]
@@ -75,8 +76,8 @@ class CovoiturageRequestController extends AbstractController
             $reqs = $repository->find($request->query->get('id'));
             $data = $serializer->serialize($reqs, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
-        }catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), 500, [], true);
+        }catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
     #[Route('/delete', name: 'req.delete', methods: ['DELETE'])]
@@ -84,8 +85,8 @@ class CovoiturageRequestController extends AbstractController
         try {
             $repository->remove($repository->find($request->query->get('id')), true);
             return $this->json("covoiturage deleted successfully",200);
-        }catch (\Exception $e) {
-            return new JsonResponse($e->getMessage(), 500, [], true);
+        }catch (HttpException $e) {
+            return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
 }
