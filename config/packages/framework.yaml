@@ -23,3 +23,7 @@ when@test:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+        cors:
+            allow_origin: [ '*' ]
+            allow_headers: [ 'Content-Type', 'Authorization' ]
+            allow_methods: [ 'GET', 'POST', 'PUT', 'DELETE' ]
