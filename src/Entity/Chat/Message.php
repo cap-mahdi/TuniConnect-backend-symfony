@@ -93,4 +93,9 @@ class Message
         return $this;
     }
 
+    public  function getContent()
+    {
+        return $this->body ;
+    }
+
 }
