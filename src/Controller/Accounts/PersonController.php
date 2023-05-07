@@ -17,6 +17,9 @@ use App\Repository\Accounts\AddressRepository;
 use App\Repository\Accounts\UserRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 
 #[Route('/person')]
@@ -26,6 +29,17 @@ public function __construct(private UserPasswordHasherInterface $hasher){
     
 }
 
+
+//get person by id passed in path
+    #[Route('/{id<\d+>}', name: 'person.id', methods: ['GET'])]
+    public function getById(MemberRepository $memberRepository,SerializerInterface $serializer , $id): Response
+    {
+        $person = $memberRepository->find($id);
+        $data = $serializer->serialize($person,
+            JsonEncoder::FORMAT,
+            [AbstractNormalizer::GROUPS => 'member']);
+        return new JsonResponse($data, 200, [], true);
+    } 
 
   //upload profile picture
     #[Route('/upload/{id}', name: 'upload', methods: ['POST'])]
@@ -40,7 +54,7 @@ public function __construct(private UserPasswordHasherInterface $hasher){
         else{
             if($request->files->has('profile')){
                 $isCover=false;
-                $uploadedFile = $request->files->get('cover');
+                $uploadedFile = $request->files->get('profile');
     
             }
         }
@@ -76,63 +90,9 @@ public function __construct(private UserPasswordHasherInterface $hasher){
     }
 
 
-    #[Route('/signup', name: 'signup',methods:['POST'])]
-    public function signup(Request $request,AddressRepository $addressRepository,UserRepository $userRepository,MemberRepository $memberRepository):Response
-    {
-        $data=json_decode($request->getContent(),true);
-        try{
-            $person=new Member();
-            $address=new Address();
-            $user=new User();
 
+    
 
-            
-        $person->setFirstName($data['firstName']);
-        $person->setLastName($data['lastName']);
-        $person->setBirthday(new \DateTime($data['birthday']));
-        $person->setGender($data['gender']);
-        $person->setPhone($data['phone']);
-        $person->setDateOfMembership(new \DateTime());
-
-
-        $address->setCity($data['city']);
-        $address->setStreet($data['street']);
-        $address->setZipCode($data['zipCode']);
-        $address->setCountry($data['country']);
-        $address->setState($data['state']);
-        $addressRepository->save($address,true);
-        $person->setAddress($address);
-
-
-
-        $user->setEmail($data["email"]);
-        $user->setPassword($this->hasher->hashPassword($user,$data["password"]));
-        $userRepository->save($user,true);
-        $person->setUser($user);
-        $memberRepository->save($person,true);
-
-        $user->setPerson($person);
-        $userRepository->save($user,true);
-        $person->setUser($user);
-        $memberRepository->save($person,true);
-
-      
-
-        $id = $user->getId() ;
-        $result = ["id"=>$id] ;
-
-        return new JsonResponse($result,200);
-        }
-
-
-        
-        catch(\Exception $e){
-            $memberRepository->remove($person,true);
-            $userRepository->remove($user,true);
-            $addressRepository->remove($address,true); 
-            return new JsonResponse($e->getMessage(),400);
-        }
-    }
 }
 
 

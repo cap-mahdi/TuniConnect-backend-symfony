@@ -5,8 +5,12 @@ namespace App\Controller\Accounts;
 use App\Entity\Accounts\Address;
 use App\Entity\Accounts\Member;
 use App\Entity\Accounts\User;
+use App\Repository\Accounts\MemberRepository;
+use App\Repository\Accounts\AddressRepository;
+use App\Repository\Accounts\UserRepository;
 use \Doctrine\Persistence\ManagerRegistry ;
 use Exception;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use \Symfony\Component\HttpFoundation\Request;
 use phpDocumentor\Reflection\TypeResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,12 +24,15 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
 
 #[Route('/member')]
 class MemberController extends AbstractController
 {    private HttpKernelInterface $httpKernel;
 
-    public function __construct(HttpKernelInterface $httpKernel)
+    public function __construct(HttpKernelInterface $httpKernel,
+    private UserPasswordHasherInterface $hasher)
     {
         $this->httpKernel = $httpKernel;
 
@@ -78,67 +85,96 @@ public function post(Request $request) : Response
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public function uploadImage(Request $request,string $type,Member $person):void
+    {
+        if($request->files->has($type)){
+    
+            $uploadedFile = $request->files->get($type);
+    
+        }
+    
+        if (!$uploadedFile) {
+            throw new FileException('No file uploaded');
+        }
+    
+    
+        $fileName = uniqid() . '.' . $uploadedFile->guessExtension();
+    
+            try {
+                $uploadedFile->move(
+                    $this->getParameter('image_directory'),
+                    $fileName
+                );
+                
+                if($type=="cover"){
+                    $person->setCoverPicture($fileName);
+                }
+                else if($type=="profile"){
+                   $person->setProfilePicture($fileName); 
+                }
+                
+                
+            } catch (FileException $e) {
+                throw new FileException($e->getMessage());
+            }
+    
+    }
+
+
 
 
     #[Route('/register', name: 'member.register' , methods: ['POST'])]
-    public function addMember(ManagerRegistry $doctrine ,Request $request , SerializerInterface $serializer): Response
+    public function addMember(Request $request ,UserRepository $userRepository,MemberRepository $memberRepository,AddressRepository $addressRepository): Response
     {
+        $data=$request->request->all();
         try{
-        $entityManager = $doctrine->getManager() ;
-        $body = json_decode($request->getContent(), true);
-        $member = new Member() ;
+            $person=new Member();
+            $address=new Address();
+            $user=new User();
 
-        $member->setName($body['name']) ;
-        $member->setPhone($body['phone']) ;
-        $currentTime = new \DateTime();
-        $member->setDateOfMembership( $currentTime) ;
+            $user->setEmail($data["email"]);
+            $user->setPassword($this->hasher->hashPassword($user,$data["password"]));
+            $userRepository->save($user,true);
 
-        //// ADDING A NEW ADDRESS
-
-
-            $bodyAddress = $body["address"] ;
-            $bodyAddress = json_encode($bodyAddress) ;
-        $subRequestAddress = Request::create('/address/add', 'POST', [], [], [], [], $bodyAddress);
-            $responseAddressJSON = $this->httpKernel->handle($subRequestAddress, HttpKernelInterface::SUB_REQUEST);
-            $responseAddress =  json_decode($responseAddressJSON->getContent(), true);
-            $addressId = $responseAddress["id"] ;
-
-            $address = $doctrine->getRepository(Address::class)->find($addressId) ;
-            $member->setAddress($address) ;
+            
+        $person->setFirstName($data['firstName']);
+        $person->setLastName($data['lastName']);
+        $person->setBirthday(new \DateTime($data['birthday']));
+        $person->setGender($data['gender']);
+        $person->setPhone($data['phone']);
+        $person->setDateOfMembership(new \DateTime());
+        $person->setUser($user);
 
 
-        ////ADDING A NEW MEMBER
-
-            $bodyUser = $body["user"] ;
-                    //$bodyUser = ["email"=>$bodyUser["email"] , "password"=>$bodyUser["password"]];
-            $bodyUser = json_encode($bodyUser) ;
-
-            $subRequestUser = Request::create('/user/add', 'POST', [], [], [], [], $bodyUser);
-
-            // simulate an HTTP request to the desired route
-            $responseUserJSON = $this->httpKernel->handle($subRequestUser, HttpKernelInterface::SUB_REQUEST);
-
-            $responseUser =  json_decode($responseUserJSON->getContent(), true);
-
-            $userId = $responseUser["id"] ;
-
-            $user = $doctrine->getRepository(User::class)->find($userId) ;
-            $member->setUser($user );
-        //SAVE MEMBER
-        $entityManager->persist($member);
-        $entityManager->flush();
-
-        //SERIALIZATION INTO JSON
-            $data = $serializer->serialize($member ,
-                JsonEncoder::FORMAT,
-                [AbstractNormalizer::GROUPS => 'Member:Post']) ;
+        $address->setCity($data['city']);
+        $address->setStreet($data['street']);
+        $address->setZipCode($data['zipCode']);
+        $address->setCountry($data['country']);
+        $address->setState($data['state']);
+        $addressRepository->save($address,true);
+        $person->setAddress($address);
 
 
-            return new JsonResponse($data , 201,  [] , true);
 
+        
+        
+        $user->setPerson($person);
+        $userRepository->save($user,true);
+        
+        $this->uploadImage($request,"cover",$person);
+        $this->uploadImage($request,"profile",$person);
+        
+        $memberRepository->save($person,true);
+      
+
+        $id = $user->getId() ;
+        return new JsonResponse($id,200 );
         }
-        catch (Exception $exception){
-            return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+
+
+        
+        catch(\Exception $e){ 
+            return new JsonResponse($e->getMessage(),400);
         }
     }
 
