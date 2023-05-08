@@ -17,8 +17,7 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post" ])]
-
+    #[Groups(["Member:Post" , "Member:Get","Message:POST","SharedPost","Comment:GetAll"])]
     protected ?int $id = null;
 
 
@@ -44,9 +43,11 @@ class Person
 
 
     #[ORM\Column(length: 50)]
+    #[Groups(["SharedPost","Comment:GetAll"])]
     protected ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(["SharedPost","Comment:GetAll"])]
     protected ?string $lastName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -56,6 +57,7 @@ class Person
     protected ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["SharedPost","Comment:GetAll","Comment:GetAll" ])]
     protected ?string $profilePicture = null;
 
     #[ORM\Column(length: 255, nullable: true)]

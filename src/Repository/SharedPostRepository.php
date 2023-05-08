@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Repository\Posts;
+namespace App\Repository;
 
-use App\Entity\Accounts\Member;
-use App\Entity\Posts\SharedPost;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,25 +38,20 @@ class SharedPostRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @return SharedPost[] Returns an array of SharedPost objects
-     */
-    public function findTimelinePost($id,$limit = 20,$offset = 0): array
-    {
-        $entityManager = $this->getEntityManager();
-        $query = $entityManager->createQuery(
-            'SELECT sp FROM App\Entity\Posts\SharedPost sp
-     WHERE sp.sharer = :id OR sp.sharer IN (
-         SELECT f.id FROM App\Entity\Accounts\Member m
-         JOIN m.friends f
-         WHERE m.id = :id
-     )
-     ORDER BY sp.date DESC'
-        )->setParameter('id', $id);
-        $results = $query->setMaxResults($limit)->setFirstResult($offset)->getResult();
-        return $results;
-
-    }
+//    /**
+//     * @return SharedPost[] Returns an array of SharedPost objects
+//     */
+//    public function findByExampleField($value): array
+//    {
+//        return $this->createQueryBuilder('s')
+//            ->andWhere('s.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->orderBy('s.id', 'ASC')
+//            ->setMaxResults(10)
+//            ->getQuery()
+//            ->getResult()
+//        ;
+//    }
 
 //    public function findOneBySomeField($value): ?SharedPost
 //    {
