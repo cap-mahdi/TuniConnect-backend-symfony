@@ -31,7 +31,7 @@ public function delete(Request $request,UserRepository $userRepository):Response
         $userRepository->remove($user,true);
         return $this->json("deleted",200, ["Content-Type" => "application/json"]);
     }
-    catch (Exception $exception){
+    catch (\Exception $exception){
         return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
     }
 
@@ -51,11 +51,13 @@ public function getUsers(Request $request,UserRepository $userRepository):Respon
           return $this->json($users,200, ["Content-Type" => "application/json"]);
       }
     }
-    catch (Exception $exception){
+    catch (\Exception $exception){
         return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
+    }
+
     }
 
 }
 
 
-}
+

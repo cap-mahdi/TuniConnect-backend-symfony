@@ -30,7 +30,7 @@ class PostShareController extends AbstractController
             $postShareRepository->save($newPost,true);
             return $this->json("added",200, ["Content-Type" => "application/json"]);
         }
-        catch (Exception $exception){
+        catch (\Exception $exception){
             return $this->json($exception->getMessage(),400, ["Content-Type" => "application/json"]);
         }
     }

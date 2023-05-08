@@ -85,100 +85,10 @@ public function post(Request $request) : Response
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public function uploadImage(Request $request,string $type,Member $person):void
-    {
-        if($request->files->has($type)){
-    
-            $uploadedFile = $request->files->get($type);
-    
-        }
-    
-        if (!$uploadedFile) {
-            throw new FileException('No file uploaded');
-        }
-    
-    
-        $fileName = uniqid() . '.' . $uploadedFile->guessExtension();
-    
-            try {
-                $uploadedFile->move(
-                    $this->getParameter('image_directory'),
-                    $fileName
-                );
-                
-                if($type=="cover"){
-                    $person->setCoverPicture($fileName);
-                }
-                else if($type=="profile"){
-                   $person->setProfilePicture($fileName); 
-                }
-                
-                
-            } catch (FileException $e) {
-                throw new FileException($e->getMessage());
-            }
-    
-    }
 
 
 
-
-    #[Route('/register', name: 'member.register' , methods: ['POST'])]
-    public function addMember(Request $request ,UserRepository $userRepository,MemberRepository $memberRepository,AddressRepository $addressRepository): Response
-    {
-        $data=$request->request->all();
-        try{
-            $person=new Member();
-            $address=new Address();
-            $user=new User();
-
-            $user->setEmail($data["email"]);
-            $user->setPassword($this->hasher->hashPassword($user,$data["password"]));
-            $userRepository->save($user,true);
-
-            
-        $person->setFirstName($data['firstName']);
-        $person->setLastName($data['lastName']);
-        $person->setBirthday(new \DateTime($data['birthday']));
-        $person->setGender($data['gender']);
-        $person->setPhone($data['phone']);
-        $person->setDateOfMembership(new \DateTime());
-        $person->setUser($user);
-
-
-        $address->setCity($data['city']);
-        $address->setStreet($data['street']);
-        $address->setZipCode($data['zipCode']);
-        $address->setCountry($data['country']);
-        $address->setState($data['state']);
-        $addressRepository->save($address,true);
-        $person->setAddress($address);
-
-
-
-        
-        
-        $user->setPerson($person);
-        $userRepository->save($user,true);
-        
-        $this->uploadImage($request,"cover",$person);
-        $this->uploadImage($request,"profile",$person);
-        
-        $memberRepository->save($person,true);
-      
-
-        $id = $user->getId() ;
-        return new JsonResponse($id,200 );
-        }
-
-
-        
-        catch(\Exception $e){ 
-            return new JsonResponse($e->getMessage(),400);
-        }
-    }
-
-
+   
     #[Route('/remove', name: 'member.remove')]
     public function removeMember(ManagerRegistry $doctrine): Response
     {

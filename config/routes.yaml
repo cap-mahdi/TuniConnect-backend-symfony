@@ -4,6 +4,9 @@ controllers:
         namespace: App\Controller
     type: attribute
 
+api_login_check:
+    path: /api/login_check
+
 uploads_images:
     path: /images/{filename}
     controller: Symfony\Bundle\FrameworkBundle\Controller\FilesystemController::show

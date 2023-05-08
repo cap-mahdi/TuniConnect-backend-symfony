@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\{Exception\BadRequestException,
     Response,
     Request,
     Session\SessionInterface};
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;

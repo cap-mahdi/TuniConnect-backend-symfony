@@ -9,6 +9,9 @@ parameters:
 
 
 services:
+    app.jwt_token_authenticator:
+        class: App\Security\Guard\JWTTokenAuthenticator
+        parent: lexik_jwt_authentication.security.guard.jwt_token_authenticator
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
