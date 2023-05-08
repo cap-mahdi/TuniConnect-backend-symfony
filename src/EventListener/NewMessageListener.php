@@ -24,16 +24,18 @@ class NewMessageListener implements EventSubscriber
         if (!$entity instanceof Message) {
             return;
         }
-
+/*        echo"Received message: {$entity->getBody()} \n";*/
+/*
         $connectionMessage = [
             'type' => 'new_message',
             'data' => [
                 'content' => $entity->getContent(),
 
             ],
-        ];
+        ];*/
+/*        $this->chat->sendToAll(json_encode($connectionMessage));*/
+        $this->chat->sendToAll($entity->getBody());
 
-        $this->chat->sendToAll(json_encode($connectionMessage));
     }
     public function getSubscribedEvents(): array
     {

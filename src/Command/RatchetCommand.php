@@ -10,20 +10,24 @@ use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use App\WebSocket\Chat;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class RatchetCommand extends Command
 {
     protected static $defaultName = 'app:ratchet';
     private ManagerRegistry  $doctrine ;
-    public function __construct( ManagerRegistry $doctrine)
+    private $httpKernel ;
+
+    public function __construct( ManagerRegistry $doctrine , HttpKernelInterface $httpKernel)
     {
         parent::__construct();
-$this->doctrine = $doctrine;
+        $this->doctrine = $doctrine;
+        $this->httpKernel = $httpKernel;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output  )
     {
-        $chat = new Chat();
+        $chat = new Chat($this->httpKernel);
 
         $wsServer = new WsServer($chat);
 
@@ -46,12 +50,12 @@ $this->doctrine = $doctrine;
         });
 
         $entityManager = $this->doctrine->getManager();
-        $newMessageListener = new NewMessageListener($chat);
+      /*  $newMessageListener = new NewMessageListener($chat);
 
         $entityManager->getEventManager()->addEventListener(
             ['postPersist'],
             $newMessageListener
-        );
+        );*/
 
         $server->run();
 
