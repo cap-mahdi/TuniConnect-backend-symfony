@@ -63,4 +63,17 @@ class RoomRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+
+    /**
+     * @return Room[] Returns an array of Room objects
+     */
+        public function findRoomsByMemberId($id) : array
+        {return $this->createQueryBuilder('r')
+        ->join('r.members', 'm')
+        ->where('m.id = :id')
+        ->setParameter('id', $id)
+        ->getQuery()
+        ->getResult();
+}
 }

@@ -26,3 +26,21 @@ services:
     App\EventListener\CorsListener:
         tags:
             - { name: kernel.event_listener, event: kernel.response }
+
+    app.my_websocket_controller:
+        class: App\Controller\MyWebSocketController
+
+    app.websocket_server:
+        class: Ratchet\App
+        arguments: [ "ws://localhost:8080" ]
+        calls:
+            - [ "route", [ "my_websocket", "@app.my_websocket_controller" ] ]
+
+    app.websocket.chat:
+        class: App\WebSocket\Chat
+
+    app.event_listener.new_message:
+        class: App\EventListener\NewMessageListener
+        arguments: [ '@app.websocket.chat' ]
+        tags:
+            - { name: doctrine.event_subscriber }

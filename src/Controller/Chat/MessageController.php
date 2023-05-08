@@ -6,6 +6,7 @@ use App\Entity\Accounts\Address;
 use App\Entity\Accounts\Member;
 use App\Entity\Chat\Message;
 use App\Entity\Accounts\Person;
+use App\Entity\Chat\Room;
 use App\Repository\Accounts\MemberRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -21,34 +23,33 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route("message")]
 class MessageController extends AbstractController
 {
-    #[Route('/add/{id<\d+>}', name: 'message.send',methods: "POST")]
-    public function sendMessage(Request $request,ManagerRegistry $doctrine,SerializerInterface $serializer, Member $receiver = null ): Response
+
+    #[Route('/add', name: 'message.send',methods: "POST")]
+    public function sendMessage(Request $request,ManagerRegistry $doctrine,SerializerInterface $serializer): Response
     {
         try {
-            $info =  json_decode($request->getContent(), true);
 
-            if(!$receiver)
-                return new JsonResponse("Receiver do not exist",404);
 
             $manager = $doctrine->getManager();
-            $memberRepository = $doctrine->getRepository(Member::class);
-            $sender = $memberRepository->find($info["sender"]["id"]);
+            $messageRepository = $doctrine->getRepository(Message::class);
+            $content = $request->getContent();
+            $data = json_decode($content, true);
+            $message  = new Message() ;
+            $sender = $doctrine->getRepository(Member::class)->find($data["senderId"]) ;
+            $message->setSender($sender)  ;
 
-            if(!$sender)
-                return new JsonResponse("Sender do not exist",404);
+            $message->setDate( new \DateTime()) ;
+             $message->setBody($data["body"]) ;
 
-            if($sender == $receiver)
-                return new JsonResponse("You cannot send message to yourself",400);
-
-            $message = new Message();
-            $message->setSender($sender);
-            $message->setBody($info["body"]);
-            $message->addReceiver($receiver);
+             $message->setRoom($doctrine->getRepository(Room::class)->find($data["roomId"]) );
 
             $manager->persist($message);
 
             $manager->flush();
-           $data = $serializer->serialize($message ,
+           /* $id = $message->getId() ;
+            $message["id"] = $id ; */
+
+            $data = $serializer->serialize($message ,
                 JsonEncoder::FORMAT,
                 [AbstractNormalizer::GROUPS => ['Message:POST']]);
             return new JsonResponse($data,201,[],true);

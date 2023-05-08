@@ -17,16 +17,16 @@ class Message
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("Message:POST")]
+    #[Groups(["Message:POST",'Message:GET'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups("Message:POST")]
+    #[Groups(["Message:POST",'Message:GET'])]
     private ?string $body = null;
 
     #[ORM\ManyToOne(inversedBy: 'messagesSent')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups("Message:POST")]
+    #[Groups(["Message:POST",'Message:GET'])]
     private ?Member $sender = null;
 
 
@@ -91,6 +91,17 @@ class Message
         $this->room = $room;
 
         return $this;
+    }
+
+    public  function getContent()
+    {
+        return $this->body ;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+
     }
 
 }
