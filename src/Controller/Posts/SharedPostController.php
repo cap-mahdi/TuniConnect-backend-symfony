@@ -163,7 +163,7 @@ class SharedPostController extends AbstractController
             $manager->persist($sharedPost);
 
             $manager->flush();
-            $jsonData = $serializer->serialize($sharedPost, 'json', ['groups' => 'SharedPost']);
+            $jsonData = $serializer->serialize(["id"=>$newComment->getId()], 'json');
             return new Response($jsonData, 200, ["Content-Type" => "application/json"]);
 
         } catch (\Exception $exception) {

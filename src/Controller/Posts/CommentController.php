@@ -16,6 +16,18 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[Route('/comment')]
 class CommentController extends AbstractController
 {
+    //get comment by id
+    #[Route('/get/{id}', name: 'comment.get_by_id', methods: ['GET'])]
+    public function getcommentById($id,SerializerInterface $serializer,ManagerRegistry $doctrine,Request $request,CommentRepository $commentRepository): Response
+    {
+        try{
+            $comment = $commentRepository->find($id);
+            $jsonData = $serializer->serialize($comment, 'json', ['groups' => 'Comment:GetAll']);
+            return new Response($jsonData, 200, ["Content-Type" => "application/json"]);
+        }catch(\Exception $exception){
+            return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
+        }
+    }
     //delete comment
     #[Route('/delete/{id}', name: 'comment.delete', methods: ['DELETE'])]
     public function deleteComment(Comment $comment = null,SerializerInterface $serializer,ManagerRegistry $doctrine): Response
@@ -47,10 +59,11 @@ class CommentController extends AbstractController
 
     //get comments by post
     #[Route('/get/all/{id}', name: 'comment.get_all', methods: ['GET'])]
-    public function getAllComments(SharedPost $sharedPost,SerializerInterface $serializer,ManagerRegistry $doctrine): Response
+    public function getAllComments($id,SerializerInterface $serializer,ManagerRegistry $doctrine,CommentRepository $commentRepository): Response
     {
         try{
-            $comments = $sharedPost->getComments()->toArray();
+
+            $comments = $commentRepository->findBy(["post"=>$id],["createdAt"=>"DESC"]);
             $jsonData = $serializer->serialize($comments, 'json', ['groups' => 'Comment:GetAll']);
             return new Response($jsonData, 200, ["Content-Type" => "application/json"]);
         }catch(\Exception $exception){
@@ -72,6 +85,8 @@ class CommentController extends AbstractController
             return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
     }
+
+
 
 
 
