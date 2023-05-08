@@ -23,12 +23,12 @@ class Address
     private ?string $street = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(["Member:Post" ])]
+    #[Groups(["Member:Post" ,"member"])]
 
     private ?string $city = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(["Member:Post" ])]
+    #[Groups(["Member:Post" ,"member"])]
     private ?string $state = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
@@ -36,7 +36,7 @@ class Address
     private ?int $zipcode = null;
 
     #[ORM\Column(length: 30)]
-    #[Groups(["Member:Post" ])]
+    #[Groups(["Member:Post" ,"member"])]
     private ?string $country = null;
 
     public function getId(): ?int

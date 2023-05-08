@@ -193,6 +193,25 @@ public function post(Request $request) : Response
         ]);
 
     }
+
+    #[Route('/get/friends/{id}', name: 'member.get_friends')]
+    public function getFriends(Member $member = null,SerializerInterface $serializer): Response
+    {
+        try{
+            $friends =  $member->getFriends();
+            $jsonData = $serializer->serialize($friends, 'json',['groups' => 'member:friend']);
+            return new Response($jsonData, 200, ["Content-Type" => "application/json"]);
+        }catch(Exception $exception){
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+
+        }
+
+
+
+
+
+
+    }
 }
 
 

@@ -17,7 +17,7 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post","SharedPost","Comment:GetAll" ,"Message:GET",'Room:CREATE'  , "RoomMember:GET"])]
+    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post","SharedPost","Comment:GetAll" ,"Message:GET",'Room:CREATE'  , "RoomMember:GET","member:friend"])]
 
     protected ?int $id = null;
 
@@ -31,7 +31,7 @@ class Person
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["Member:Post" , "Member:Get" ])]
+    #[Groups(["Member:Post" , "Member:Get","member" ])]
 
     protected ?Address $address = null;
     #[Groups("member")]
@@ -43,11 +43,11 @@ class Person
 
 
     #[ORM\Column(length: 50)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member"])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend"])]
     protected ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member"])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend"])]
 
     protected ?string $lastName = null;
 
@@ -60,7 +60,7 @@ class Person
     protected ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member"])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend"])]
 
     protected ?string $profilePicture = null;
 
