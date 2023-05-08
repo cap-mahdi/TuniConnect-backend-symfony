@@ -75,6 +75,7 @@ class authenticationController extends AbstractController
 
 public function uploadImage(Request $request,string $type,Member $person):void
 {
+    $uploadedFile = null;
     if($request->files->has($type)){
 
         $uploadedFile = $request->files->get($type);
@@ -82,7 +83,7 @@ public function uploadImage(Request $request,string $type,Member $person):void
     }
 
     if (!$uploadedFile) {
-        throw new FileException('No file uploaded');
+        return;
     }
 
 
@@ -112,7 +113,7 @@ public function uploadImage(Request $request,string $type,Member $person):void
 
 
 
-#[Route('/api/login', name: 'member.register' , methods: ['POST'])]
+#[Route('/api/register', name: 'member.register' , methods: ['POST'])]
     public function addMember(Request $request ,UserRepository $userRepository,MemberRepository $memberRepository,AddressRepository $addressRepository,JWTTokenManagerInterface $jwtManager): Response
     {
         $data=$request->request->all();
@@ -120,13 +121,11 @@ public function uploadImage(Request $request,string $type,Member $person):void
             $person=new Member();
             $address=new Address();
             $user=new User();
-
             $user->setEmail($data["email"]);
             $user->setPassword($this->hasher->hashPassword($user,$data["password"]));
             $user->setRoles(["ROLE_USER"]);
             $userRepository->save($user,true);
 
-            
         $person->setFirstName($data['firstName']);
         $person->setLastName($data['lastName']);
         $person->setBirthday(new \DateTime($data['birthday']));
@@ -155,9 +154,9 @@ public function uploadImage(Request $request,string $type,Member $person):void
         $this->uploadImage($request,"profile",$person);
         
         $memberRepository->save($person,true);
-      
+        dump("here");
         $token=$jwtManager->create($user);
-
+        dump($token);
         return new JsonResponse(['token' => $token],200 );
         }
 
@@ -167,5 +166,25 @@ public function uploadImage(Request $request,string $type,Member $person):void
             return new JsonResponse($e->getMessage(),400);
         }
     }
+    #[Route('/api/login', name: 'login' , methods: ['POST'])]
+    public function login(Request $request,UserRepository $userRepository,JWTTokenManagerInterface $jwtManager): Response
+    {
+        $data=json_decode($request->getContent());
+        $data=get_object_vars($data);
+        $user=$userRepository->findOneBy(["email"=>$data["email"]]);
+        if($user){
+            if($this->hasher->isPasswordValid($user,$data["password"])){
+                $token=$jwtManager->create($user);
+                return new JsonResponse(['token' => $token],200 );
+            }
+            else{
+                return new JsonResponse("Wrong credentials",400);
+            }
+        }
+        else{
+            return new JsonResponse("Wrong credentials",400);
+        }
+    }
+
 
 }

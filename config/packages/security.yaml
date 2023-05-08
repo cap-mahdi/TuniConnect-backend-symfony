@@ -54,6 +54,7 @@ security:
         - { path: ^/person, roles: ROLE_USER }
         - { path: ^/user, roles: ROLE_USER }
         - { path: ^/post, roles: ROLE_USER }
+        - { path: ^/shared, roles: ROLE_USER }
 when@test:
     security:
         password_hashers:
