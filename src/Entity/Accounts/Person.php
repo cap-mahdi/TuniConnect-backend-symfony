@@ -34,34 +34,38 @@ class Person
     #[Groups(["Member:Post" , "Member:Get" ])]
 
     protected ?Address $address = null;
-
+    #[Groups("member")]
 
     #[ORM\OneToOne(inversedBy: 'person', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["Member:Post" , "Member:Get" ])]
 
     protected ?User $user = null;
 
 
     #[ORM\Column(length: 50)]
-    #[Groups(["SharedPost","Comment:GetAll"])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member"])]
     protected ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(["SharedPost","Comment:GetAll"])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member"])]
+
     protected ?string $lastName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups("member")]
     protected ?\DateTimeInterface $birthday = null;
 
     #[ORM\Column(length: 10)]
+    #[Groups("member")]
     protected ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["SharedPost","Comment:GetAll","Comment:GetAll" ])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member"])]
+
     protected ?string $profilePicture = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("member")]
     protected ?string $coverPicture = null;
 
 

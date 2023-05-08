@@ -86,10 +86,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setPerson(Person $person): self
     {
-        // set the owning side of the relation if necessary
-        if ($person->getAccount() !== $this) {
-            $person->setAccount($this);
-        }
 
         $this->person = $person;
 
