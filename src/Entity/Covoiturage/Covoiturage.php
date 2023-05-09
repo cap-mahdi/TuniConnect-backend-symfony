@@ -8,6 +8,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: CovoiturageRepository::class)]
 class Covoiturage
@@ -15,27 +17,35 @@ class Covoiturage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST' ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     private ?string $destination = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     private ?string $departure = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     private ?\DateTimeInterface $departureTime = null;
 
     #[ORM\Column]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     private ?int $numberOfPlaces = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $numberOfPlacesTaken = null;
+    #[Groups(['Cov:GET', 'ReqCov: POST'])]
+    private ?int $numberOfPlacesTaken = 0;
 
     #[ORM\Column(type: Types::SMALLINT)]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     private ?int $price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     private ?string $description = null;
 
     #[ORM\Column]
@@ -43,9 +53,11 @@ class Covoiturage
 
     #[ORM\ManyToOne(inversedBy: 'covoiturages')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     private ?Member $driver = null;
 
     #[ORM\ManyToMany(targetEntity: Member::class, inversedBy: 'covoituragesTaken')]
+    #[Groups(['Cov:GET', 'ReqCov: POST'])]
     private Collection $passengers;
 
     #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: RequestCovoiturage::class)]

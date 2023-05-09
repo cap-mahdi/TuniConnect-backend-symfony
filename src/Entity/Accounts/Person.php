@@ -17,14 +17,14 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post","SharedPost","Comment:GetAll" ,"Message:GET",'Room:CREATE'  , "RoomMember:GET","member:friend"])]
+    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post","SharedPost","Comment:GetAll" ,"Message:GET",'Room:CREATE'  , "RoomMember:GET","member:friend" , "Cov:GET"])]
 
     protected ?int $id = null;
 
 
 
     #[ORM\Column(nullable: true)]
-    #[Groups("member" )]
+    #[Groups(["member", "Cov:GET"])]
 
     protected ?int $phone = null;
 
@@ -43,12 +43,11 @@ class Person
 
 
     #[ORM\Column(length: 50)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend"])]
+    
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend" , 'Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     protected ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend"])]
-
     protected ?string $lastName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -60,7 +59,7 @@ class Person
     protected ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend"])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend" , 'Cov:GET'])]
 
     protected ?string $profilePicture = null;
 
