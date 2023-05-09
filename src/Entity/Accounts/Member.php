@@ -7,6 +7,7 @@ use App\Entity\Chat\Room;
 use App\Entity\Covoiturage\Covoiturage;
 use App\Entity\Covoiturage\RequestCovoiturage;
 use App\Entity\Notifications\Notification;
+use App\Entity\Posts\Post;
 use App\Entity\Posts\SharedPost;
 use App\Repository\Accounts\MemberRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -28,10 +29,10 @@ class Member extends Person
 
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["Member:Post" , "Member:Get" ])]
+    #[Groups(["Member:Post" , "Member:Get" , 'PostNotification:get' , 'friendRequest:get'])]
     private ?\DateTimeInterface $dateOfMembership = null;
 
-    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: FriendRequest::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: FriendRequest::class, orphanRemoval: true)]
     private Collection $friendRequests;
 
     #[ORM\ManyToMany(targetEntity: self::class)]
@@ -61,6 +62,11 @@ class Member extends Person
     #[ORM\OneToMany(mappedBy: 'relatedTo', targetEntity: Notification::class)]
     private Collection $notifications;
 
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Post::class)]
+    private Collection $myPosts;
+
+
+
 
 
 
@@ -79,6 +85,7 @@ class Member extends Person
         $this->covoituragesTaken = new ArrayCollection();
         $this->requestCovoiturageSent = new ArrayCollection();
         $this->notifications = new ArrayCollection();
+        $this->myPosts = new ArrayCollection();
     }
 
     /**
@@ -408,5 +415,37 @@ class Member extends Person
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Post>
+     */
+    public function getMyPosts(): Collection
+    {
+        return $this->myPosts;
+    }
+
+    public function addMyPost(Post $myPost): self
+    {
+        if (!$this->myPosts->contains($myPost)) {
+            $this->myPosts->add($myPost);
+            $myPost->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMyPost(Post $myPost): self
+    {
+        if ($this->myPosts->removeElement($myPost)) {
+            // set the owning side to null (unless already changed)
+            if ($myPost->getOwner() === $this) {
+                $myPost->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+
 
 }

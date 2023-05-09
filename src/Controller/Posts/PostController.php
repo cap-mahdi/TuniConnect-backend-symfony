@@ -2,46 +2,101 @@
 
 namespace App\Controller\Posts;
 
+use App\Entity\Accounts\Member;
 use App\Entity\Posts\Post;
+use App\Entity\Posts\SharedPost;
 use App\Repository\Accounts\MemberRepository;
 use App\Repository\Posts\PostRepository;
 
+use Doctrine\Persistence\ManagerRegistry;
 use SebastianBergmann\Timer\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{Exception\BadRequestException, JsonResponse, Response, Request};
+use Symfony\Component\HttpFoundation\{Exception\BadRequestException,
+    JsonResponse,
+    Response,
+    Request,
+    Session\SessionInterface};
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
+
 
 
 #[Route('/post')]
 class PostController extends AbstractController
 {
     #[Route('/add', name: 'post.add', methods: ['POST'])]
-    public function addPost(Request $request, MemberRepository $memberRepository, PostRepository $postRepository, SerializerInterface $serializer): Response
+    public function addPost(Request $request, MemberRepository $memberRepository, SerializerInterface $serializer,ManagerRegistry $doctrine,SluggerInterface $slugger): Response
     {
         try {
-            $data = json_decode($request->getContent(), true);
-            $poster = $memberRepository->find($data["poster_id"]);
-            $post = new Post();
-            $post->setText($data["text"]);
-            $poster->addPost($post);
-            $postRepository->save($post, true);
-            $data = $serializer->serialize($post,
+
+
+            $file = $request->files->get("image");
+            dump($file);
+            $data = $request->request->all();
+            $member = $memberRepository->find($data['member_id']);
+
+            $newPost = new Post();
+            $newPost->setText($data['text']);
+            $newPost->setEdited(false);
+            $newPost->setOwner($member);
+            if ($file) {
+                $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                // this is needed to safely include the file name as part of the URL
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+
+                // Move the file to the directory where brochures are stored
+                try {
+                    $file->move(
+                        $this->getParameter('posts_images'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    return $this->json($e->getMessage(),500, ["Content-Type" => "application/json"]);
+                }
+
+                $newPost->setPhotos([$newFilename]);
+            }
+
+            $newSharedPost = new SharedPost();
+            $newSharedPost->setPost($newPost);
+            $newSharedPost->setSharer($member);
+            $newSharedPost->setIsShared(false);
+
+            $manager = $doctrine->getManager();
+            $manager->persist($newPost);
+            $manager->persist($newSharedPost);
+            $manager->flush();
+
+            $jsonData = $serializer->serialize($newSharedPost,
                 JsonEncoder::FORMAT,
-                [AbstractNormalizer::GROUPS => 'Post:Post']);
-            return new JsonResponse($data, 200, [], true);
+                [AbstractNormalizer::GROUPS => 'SharedPost']);
+            return new JsonResponse($jsonData, 200, [], true);
+
+
         } catch (\Exception $exception) {
             return $this->json($exception->getMessage(),500, ["Content-Type" => "application/json"]);
         }
     }
 
-    #[Route('/', name: 'post.list', methods:['GET'])]
-    public function getAll(PostRepository $postRepository, SerializerInterface $serializer): Response
+    #[Route('/:id', name: 'post.timeline', methods:['GET'])]
+    public function getPostsTimeline(PostRepository $postRepository, SerializerInterface $serializer,Member $member): Response
     {
         try {
-            $posts = $postRepository->findAll();
+            $memberPosts = arrat_merge($member->getMyPosts(),$member->getSharedPosts());
+
+            $memberFriends = $member->getFriends();
+            $posts = [];
+            foreach ($memberFriends as $friend){
+                foreach($friend->getMyPosts() as $friendPost){
+                    $posts[] = $friendPost;
+                }
+            }
+            $timelinePosts = array_merge($memberPosts,$posts);
             $data = $serializer->serialize($posts,
                 JsonEncoder::FORMAT,
                 [AbstractNormalizer::GROUPS => 'Post:Get']);

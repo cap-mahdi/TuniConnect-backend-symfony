@@ -40,7 +40,7 @@ class NotificationRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return Notification[] Returns an array of Notification objects
+//     * @return Notifications[] Returns an array of Notifications objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class NotificationRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Notification
+//    public function findOneBySomeField($value): ?Notifications
 //    {
 //        return $this->createQueryBuilder('n')
 //            ->andWhere('n.exampleField = :val')

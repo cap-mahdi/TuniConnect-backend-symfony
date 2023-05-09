@@ -7,20 +7,27 @@ use App\Repository\Chat\RoomRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RoomRepository::class)]
 class Room
 {
-    #[ORM\Id]
+
+#[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Room:CREATE' ,"Room:GET"])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'rooms')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['Room:CREATE'])]
+
     private ?Member $creator = null;
 
     #[ORM\ManyToMany(targetEntity: Member::class, inversedBy: 'roomsIn')]
+    #[Groups(['Room:CREATE'])]
+
     private Collection $members;
 
     #[ORM\OneToMany(mappedBy: 'room', targetEntity: Message::class)]

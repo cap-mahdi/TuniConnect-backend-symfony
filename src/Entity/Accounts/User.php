@@ -19,6 +19,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(["member" ])]
+
     private ?string $email = null;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
@@ -86,10 +88,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setPerson(Person $person): self
     {
-        // set the owning side of the relation if necessary
-        if ($person->getAccount() !== $this) {
-            $person->setAccount($this);
-        }
 
         $this->person = $person;
 

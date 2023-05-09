@@ -3,6 +3,7 @@
 namespace App\Entity\Notifications;
 
 use App\Entity\Posts\Post;
+use App\Entity\Posts\SharedPost;
 use App\Repository\Notifications\PostNotificationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,16 +13,16 @@ class PostNotification extends Notification
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Post $post = null;
+    private ?SharedPost $post = null;
 
 
 
-    public function getPost(): ?Post
+    public function getPost(): ?SharedPost
     {
         return $this->post;
     }
 
-    public function setPost(?Post $post): self
+    public function setPost(?SharedPost $post): self
     {
         $this->post = $post;
 

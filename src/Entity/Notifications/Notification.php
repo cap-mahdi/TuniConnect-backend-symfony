@@ -18,7 +18,7 @@ class Notification
     protected ?string $type = null;
 
     #[ORM\Column]
-    protected ?\DateTimeImmutable $createdAt = null;
+    protected ?\DateTime $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'notifications')]
     #[ORM\JoinColumn(nullable: false)]
@@ -41,12 +41,12 @@ class Notification
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTime
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    public function setCreatedAt(\DateTime $createdAt): self
     {
         $this->createdAt = $createdAt;
 

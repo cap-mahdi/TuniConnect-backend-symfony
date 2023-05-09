@@ -5,19 +5,24 @@ namespace App\Entity\Posts;
 use App\Entity\Accounts\Member;
 use App\Repository\Posts\CommentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Comment
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["SharedPost",'Comment:GetAll'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["SharedPost",'Comment:GetAll'])]
     private ?string $text = null;
 
     #[ORM\Column]
+    #[Groups(["SharedPost",'Comment:GetAll'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
@@ -26,6 +31,7 @@ class Comment
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["SharedPost",'Comment:GetAll'])]
     private ?Member $commenter = null;
 
     public function getId(): ?int
@@ -79,5 +85,10 @@ class Comment
         $this->commenter = $commenter;
 
         return $this;
+    }
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
     }
 }
