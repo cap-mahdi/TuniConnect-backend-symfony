@@ -17,14 +17,14 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post" ])]
+    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post", "Cov:GET" ])]
 
     protected ?int $id = null;
 
 
 
     #[ORM\Column(nullable: true)]
-    #[Groups("member")]
+    #[Groups(["member", "Cov:GET"])]
 
     protected ?int $phone = null;
 
@@ -58,6 +58,7 @@ class Person
     protected ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['Cov:GET'])]
     protected ?string $profilePicture = null;
 
     #[ORM\Column(length: 255, nullable: true)]
