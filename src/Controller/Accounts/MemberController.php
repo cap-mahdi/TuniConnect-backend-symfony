@@ -11,7 +11,7 @@ use App\Repository\Covoiturage\RequestCovoiturageRepository;
 use App\Repository\Accounts\MemberRepository;
 use App\Repository\Accounts\AddressRepository;
 use App\Repository\Accounts\UserRepository;
-use \Doctrine\Persistence\ManagerRegistry ;
+use \Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use \Symfony\Component\HttpFoundation\Request;
@@ -33,64 +33,147 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/member')]
 class MemberController extends AbstractController
-{    private HttpKernelInterface $httpKernel;
+{
+    private HttpKernelInterface $httpKernel;
 
-    public function __construct(HttpKernelInterface $httpKernel,
-    private UserPasswordHasherInterface $hasher)
+    public function __construct(HttpKernelInterface                 $httpKernel,
+                                private UserPasswordHasherInterface $hasher)
     {
         $this->httpKernel = $httpKernel;
 
     }
 
-    #[Route('/post' , name : 'member.post')]
-public function post(Request $request) : Response
-{
-    $data=$request->getContent() ;
-    return new JsonResponse($data , 200,  [] , true) ;
-}
-
-    #[Route('/{id<\d+>}' , name : 'member.id')]
-    public function getById(ManagerRegistry $doctrine , SerializerInterface $serializer , $id) : Response
+    #[Route('/post', name: 'member.post')]
+    public function post(Request $request): Response
     {
-        $entityManager  = $doctrine->getManager() ;
-        $repository =  $entityManager->getRepository(Member::class)  ;
-        $allMembers =$repository->find($id) ;
-
-        $data = $serializer->serialize($allMembers ,
-            JsonEncoder::FORMAT,
-            [AbstractNormalizer::GROUPS => 'member']) ;
-
-        return new JsonResponse($data , 200,  [] , true);
+        $data = $request->getContent();
+        return new JsonResponse($data, 200, [], true);
     }
-    #[Route('/' , name : 'member.list')]
-    public function index(ManagerRegistry $doctrine , SerializerInterface $serializer) : Response
+
+    #[Route('/{id<\d+>}', name: 'member.id')]
+    public function getById(ManagerRegistry $doctrine, SerializerInterface $serializer, $id): Response
     {
-        $entityManager  = $doctrine->getManager() ;
-        $repository =  $entityManager->getRepository(Member::class)  ;
-        $allMembers =$repository->findAll() ;
+        $entityManager = $doctrine->getManager();
+        $repository = $entityManager->getRepository(Member::class);
+        $allMembers = $repository->find($id);
 
-
-
-        $data = $serializer->serialize($allMembers ,
+        $data = $serializer->serialize($allMembers,
             JsonEncoder::FORMAT,
-            [AbstractNormalizer::GROUPS => 'Member:Get']) ;
+            [AbstractNormalizer::GROUPS => 'member']);
 
-        return new JsonResponse($data , 200,  [] , true);
+        return new JsonResponse($data, 200, [], true);
+    }
+
+
+    #[Route('/', name: 'member.list')]
+    public function index(ManagerRegistry $doctrine, SerializerInterface $serializer): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $repository = $entityManager->getRepository(Member::class);
+        $allMembers = $repository->findAll();
+
+
+        $data = $serializer->serialize($allMembers,
+            JsonEncoder::FORMAT,
+            [AbstractNormalizer::GROUPS => 'Member:Get']);
+
+        return new JsonResponse($data, 200, [], true);
 
     }
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public function uploadImage(Request $request, string $type, Member $person): void
+    {
+        if ($request->files->has($type)) {
+
+            $uploadedFile = $request->files->get($type);
+
+        }
+
+        if (!$uploadedFile) {
+            throw new FileException('No file uploaded');
+        }
 
 
+        $fileName = uniqid() . '.' . $uploadedFile->guessExtension();
 
-   
+        try {
+            $uploadedFile->move(
+                $this->getParameter('image_directory'),
+                $fileName
+            );
+
+            if ($type == "cover") {
+                $person->setCoverPicture($fileName);
+            } else if ($type == "profile") {
+                $person->setProfilePicture($fileName);
+            }
+
+
+        } catch (FileException $e) {
+            throw new FileException($e->getMessage());
+        }
+
+    }
+
+
+    #[Route('/register', name: 'member.register', methods: ['POST'])]
+    public function addMember(Request $request, UserRepository $userRepository, MemberRepository $memberRepository, AddressRepository $addressRepository): Response
+    {
+        $data = $request->request->all();
+        try {
+            $person = new Member();
+            $address = new Address();
+            $user = new User();
+
+            $user->setEmail($data["email"]);
+            $user->setPassword($this->hasher->hashPassword($user, $data["password"]));
+            $userRepository->save($user, true);
+
+
+            $person->setFirstName($data['firstName']);
+            $person->setLastName($data['lastName']);
+            $person->setBirthday(new \DateTime($data['birthday']));
+            $person->setGender($data['gender']);
+            $person->setPhone($data['phone']);
+            $person->setDateOfMembership(new \DateTime());
+            $person->setUser($user);
+
+
+            $address->setCity($data['city']);
+            $address->setStreet($data['street']);
+            $address->setZipCode($data['zipCode']);
+            $address->setCountry($data['country']);
+            $address->setState($data['state']);
+            $addressRepository->save($address, true);
+            $person->setAddress($address);
+
+
+            $user->setPerson($person);
+            $userRepository->save($user, true);
+
+            $this->uploadImage($request, "cover", $person);
+            $this->uploadImage($request, "profile", $person);
+
+            $memberRepository->save($person, true);
+
+
+            $id = $user->getId();
+            return new JsonResponse($id, 200);
+        } catch (\Exception $e) {
+            return new JsonResponse($e->getMessage(), 400);
+        }
+    }
+
+
     #[Route('/remove', name: 'member.remove')]
     public function removeMember(ManagerRegistry $doctrine): Response
     {
-        $entityManager = $doctrine->getManager() ;
-        $member = new Member() ;
+        $entityManager = $doctrine->getManager();
+        $member = new Member();
+
 
         return $this->render('member/remove.html.twig', [
             'member' => $member,
@@ -99,23 +182,31 @@ public function post(Request $request) : Response
     }
 
     #[Route('/get/friends/{id}', name: 'member.get_friends')]
-    public function getFriends(Member $member = null,SerializerInterface $serializer): Response
+    public function getFriends(Member $member = null, SerializerInterface $serializer): Response
     {
-        try{
-            $friends =  $member->getFriends();
-            $jsonData = $serializer->serialize($friends, 'json',['groups' => 'member:friend']);
+        try {
+            $friends = $member->getFriends();
+            $jsonData = $serializer->serialize($friends, 'json', ['groups' => 'member:friend']);
             return new Response($jsonData, 200, ["Content-Type" => "application/json"]);
-        }catch(Exception $exception){
+        } catch (Exception $exception) {
             return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
 
         }
 
-
-
-
-
-
     }
+
+
+    //get the member's notifications
+    #[Route('/get/notification/{id}', name: 'member_get_notifications')]
+    public function getNotifications(Member $member = null, SerializerInterface $serializer): Response
+    {
+        try {
+            $notifications = $member->getNotifications();
+            return $this->json($notifications);
+        } catch (Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+
+    }}
 
 
 
@@ -196,6 +287,35 @@ public function post(Request $request) : Response
             return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
+
+
+
+
+//  get friend request by member id
+    #[Route('/get/friend/request/{id}', name: 'get_friend_request')]
+    public function getFriendRequestsByMember($id, ManagerRegistry $doctrine, SerializerInterface $serializer): Response
+    {
+        try {
+            $memberRepository = $doctrine->getRepository(Member::class);
+            $member = $memberRepository->find($id);
+            $friendRequests = $member->getFriendRequests();
+            $jsonData = $serializer->serialize($friendRequests,
+                JsonEncoder::FORMAT,
+                [AbstractNormalizer::GROUPS => 'friendRequest:get']);
+            return new JsonResponse($jsonData, 200, [], true);
+
+        } catch (Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+
+        }
+
+
+}
+
+
+
+//  get friend request by member id
+
 
 }
 

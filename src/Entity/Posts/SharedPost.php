@@ -19,11 +19,11 @@ class SharedPost
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["SharedPost"])]
+    #[Groups(["SharedPost" , 'PostNotification:get'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'sharedPosts')]
-    #[Groups(["SharedPost"])]
+    #[Groups(["SharedPost" ])]
     private ?Member $sharer = null;
 
     #[ORM\ManyToMany(targetEntity: Member::class, inversedBy: 'likedPosts')]

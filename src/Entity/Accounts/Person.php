@@ -17,24 +17,24 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["Member:Post" , "Member:Get","Message:POST","Post:Get", "Post:Post","SharedPost","Comment:GetAll" ,"Message:GET",'Room:CREATE'  , "RoomMember:GET","member:friend" , "Cov:GET" , 'member'])]
+    #[Groups(["Member:Post" , 'friendRequest:get' ,'PostNotification:get', "Member:Get","Message:POST","Post:Get", "Post:Post","SharedPost","Comment:GetAll" ,"Message:GET",'Room:CREATE'  , "RoomMember:GET","member:friend" , "Cov:GET" , 'member'])]
 
     protected ?int $id = null;
 
 
 
     #[ORM\Column(nullable: true)]
-    #[Groups(["member", "Cov:GET"])]
+    #[Groups(["member", "Cov:GET" , 'PostNotification:get'])]
 
     protected ?int $phone = null;
 
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(["Member:Post" , "Member:Get","member" ])]
+    #[Groups(["Member:Post" , "Member:Get","member" , 'PostNotification:get' , 'friendRequest:get'])]
 
     protected ?Address $address = null;
-    #[Groups("member")]
+    #[Groups(["member", 'PostNotification:get' , 'friendRequest:get'])]
 
     #[ORM\OneToOne(inversedBy: 'person', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
@@ -43,28 +43,29 @@ class Person
 
 
     #[ORM\Column(length: 50)]
-    
-    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend" , 'Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend",'PostNotification:get' , 'friendRequest:get','Cov:POST', 'Cov:GET', 'ReqCov: POST'])]
     protected ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend", 'PostNotification:get' , 'friendRequest:get'])]
+
     protected ?string $lastName = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups("member")]
+    #[Groups(["member", 'PostNotification:get' , 'friendRequest:get'])]
     protected ?\DateTimeInterface $birthday = null;
 
     #[ORM\Column(length: 10)]
-    #[Groups("member")]
+    #[Groups(["member" ,  'PostNotification:get' , 'friendRequest:get'])]
     protected ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend" , 'Cov:GET'])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend",'friendRequest:get','Cov:GET'])]
 
     protected ?string $profilePicture = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups("member")]
+    #[Groups("member" , 'friendRequest:get')]
     protected ?string $coverPicture = null;
 
 

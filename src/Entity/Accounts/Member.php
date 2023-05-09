@@ -29,10 +29,10 @@ class Member extends Person
 
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(["Member:Post" , "Member:Get" ])]
+    #[Groups(["Member:Post" , "Member:Get" , 'PostNotification:get' , 'friendRequest:get'])]
     private ?\DateTimeInterface $dateOfMembership = null;
 
-    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: FriendRequest::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: FriendRequest::class, orphanRemoval: true)]
     private Collection $friendRequests;
 
     #[ORM\ManyToMany(targetEntity: self::class)]
