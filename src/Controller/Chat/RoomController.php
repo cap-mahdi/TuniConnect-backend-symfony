@@ -168,7 +168,7 @@ class RoomController extends AbstractController
             //copilot are you here?
             foreach ($rooms as $room) {
                 $data .=$serializer->serialize($room,
-                        JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ["Room:GET"]]) . "," ;
+                        JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ["Room:CREATE"]]) . "," ;
             }
             $data = substr($data, 0, -1) ;
             $data .= "]" ;
