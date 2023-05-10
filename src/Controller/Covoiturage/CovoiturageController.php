@@ -119,7 +119,6 @@ class CovoiturageController extends AbstractController
     public function delete(Request $request, CovoiturageRepository $repository, RequestCovoiturageRepository $requestCovoiturageRepository): JsonResponse {
         try {
             $cov = $repository->find($request->query->get('id'));
-            $requestCovoiturageRepository->removeById($request->query->get('id'), true);
             $repository->remove($cov, true);
             return $this->json("covoiturage deleted successfully",200);
         } catch (HttpException $e) {

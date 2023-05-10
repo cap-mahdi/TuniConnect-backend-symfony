@@ -71,10 +71,15 @@ class CovoiturageRequestController extends AbstractController
         }
     }
     #[Route('/request', name: 'req.findByID', methods: ['GET'])]
-    public function findByID(Request $request, RequestCovoiturageRepository $repository, SerializerInterface $serializer): JsonResponse {
+    public function findByID(Request $request, RequestCovoiturageRepository $repository, SerializerInterface $serializer, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository): JsonResponse {
         try {
-            $reqs = $repository->find($request->query->get('id'));
-            $data = $serializer->serialize($reqs, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
+            $sender = $memberRepository->find($request->query->get('sender_id'));
+            $covoiturage_id = $covoiturageRepository->find($request->query->get('covoiturage_id'));
+            $req = $repository->findBy(['sender' => $sender, 'covoiturage' => $covoiturage_id]);
+            if ($req === null) {
+                return new JsonResponse('Request not found', Response::HTTP_NOT_FOUND);
+            }
+            $data = $serializer->serialize($req, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
         }catch (HttpException $e) {
             return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
