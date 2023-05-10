@@ -17,14 +17,14 @@ class Person
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["Member:Post" , 'friendRequest:get' ,'PostNotification:get', "Member:Get","Message:POST","Post:Get", "Post:Post","SharedPost","Comment:GetAll" ,"Message:GET",'Room:CREATE'  , "RoomMember:GET","member:friend" , "Cov:GET" , 'member'])]
+    #[Groups(["Member:Post" , 'friendRequest:get' ,'PostNotification:get', "Member:Get","Message:POST","Post:Get", "Post:Post","SharedPost","Comment:GetAll" ,"Message:GET",'Room:CREATE'  , "RoomMember:GET","member:friend" , "Cov:GET" , 'member', 'ReqCov: POST'])]
 
     protected ?int $id = null;
 
 
 
     #[ORM\Column(nullable: true)]
-    #[Groups(["member", "Cov:GET" , 'PostNotification:get'])]
+    #[Groups(["member", "Cov:GET" , 'PostNotification:get', 'ReqCov: POST'])]
 
     protected ?int $phone = null;
 
@@ -47,7 +47,7 @@ class Person
     protected ?string $firstName = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend", 'PostNotification:get' , 'friendRequest:get'])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend", 'PostNotification:get' , 'friendRequest:get', 'Cov:GET', 'ReqCov: POST'])]
 
     protected ?string $lastName = null;
 
@@ -60,7 +60,7 @@ class Person
     protected ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend",'friendRequest:get','Cov:GET'])]
+    #[Groups(["SharedPost","Comment:GetAll" , "member","member:friend",'friendRequest:get','Cov:GET', 'ReqCov: POST'])]
 
     protected ?string $profilePicture = null;
 

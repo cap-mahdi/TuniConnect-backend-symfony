@@ -60,7 +60,7 @@ class Covoiturage
     #[Groups(['Cov:GET', 'ReqCov: POST'])]
     private Collection $passengers;
 
-    #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: RequestCovoiturage::class)]
+    #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: RequestCovoiturage::class,cascade: ["remove"])]
     private Collection $requestCovoiturages;
 
     public function __construct()
