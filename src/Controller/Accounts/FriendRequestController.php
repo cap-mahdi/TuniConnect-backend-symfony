@@ -116,7 +116,27 @@ class FriendRequestController extends AbstractController
     }
 
 
+//verify if a member sent a friend request to a member
+    #[Route("/{idSender}/sent_to/{idReceiver}" , name:"verify_sending_friend_request")]
+    public function verifyFriendRequestSending($idSender , $idReceiver , ManagerRegistry $doctrine ,  SerializerInterface $serializer)
+    {
+        try {
+            $friendRequestRepository = $doctrine->getRepository(FriendRequest::class);
+            $friendRequest = new FriendRequest();
+            $friendRequest = $friendRequestRepository->findBy([
+                "sender" => $idSender,
+                "receiver" => $idReceiver
+            ]);
+            $data = [
+                'sentRequest' => $friendRequest!=null
+            ];
 
+            return new JsonResponse($data, 200, ['Content-Type' => 'application/json']);
 
+        } catch (\Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+
+        }
+    }
 
 }
