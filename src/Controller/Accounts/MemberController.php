@@ -206,8 +206,8 @@ class MemberController extends AbstractController
         } catch (Exception $exception) {
             return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
 
-    }}
-
+        }
+    }
 
 
     #[Route('/sendCovRequest', name: 'member.CovRequest', methods: ['POST'])]
@@ -240,7 +240,8 @@ class MemberController extends AbstractController
     }
 
     #[Route('/acceptCov', name: 'member.acceptCov', methods: ['PUT'])]
-    public function acceptCovRequest(Request $request, RequestCovoiturageRepository $requestCovoiturageRepository, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository, SerializerInterface $serializer): JsonResponse {
+    public function acceptCovRequest(Request $request, RequestCovoiturageRepository $requestCovoiturageRepository, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository, SerializerInterface $serializer): JsonResponse
+    {
         try {
             $sender = $memberRepository->find($request->query->get('sender_id'));
             $covoiturage = $covoiturageRepository->find($request->query->get('covoiturage_id'));
@@ -253,20 +254,21 @@ class MemberController extends AbstractController
             }
 
             $Request->setStatus('accepted');
-            $covoiturage->setNumberOfPlacesTaken($covoiturage->getNumberOfPlacesTaken()+1);
+            $covoiturage->setNumberOfPlacesTaken($covoiturage->getNumberOfPlacesTaken() + 1);
             $sender->addCovoituragesTaken($covoiturage);
             $requestCovoiturageRepository->save($Request, true);
             $covoiturageRepository->save($covoiturage, true);
 
             $data = $serializer->serialize($Request, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
-        }catch (HttpException $e) {
+        } catch (HttpException $e) {
             return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
 
     #[Route('/rejectCov', name: 'member.rejectCov', methods: ['PUT'])]
-    public function rejectCovRequest(Request $request, RequestCovoiturageRepository $requestCovoiturageRepository, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository, SerializerInterface $serializer): JsonResponse {
+    public function rejectCovRequest(Request $request, RequestCovoiturageRepository $requestCovoiturageRepository, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository, SerializerInterface $serializer): JsonResponse
+    {
         try {
             $sender = $memberRepository->find($request->query->get('sender_id'));
             $covoiturage = $covoiturageRepository->find($request->query->get('covoiturage_id'));
@@ -283,15 +285,13 @@ class MemberController extends AbstractController
 
             $data = $serializer->serialize($Request, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
-        }catch (HttpException $e) {
+        } catch (HttpException $e) {
             return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
 
 
-
-
-//  get friend request by member id
+//  get friend  request received by member id
     #[Route('/get/friend/request/{id}', name: 'get_friend_request')]
     public function getFriendRequestsByMember($id, ManagerRegistry $doctrine, SerializerInterface $serializer): Response
     {
@@ -310,11 +310,43 @@ class MemberController extends AbstractController
         }
 
 
-}
+    }
 
 
+//  verify if two members are friends or not
+    #[Route('/areFriends/{id1}/{id2}', name: 'are_friends')]
+    public function verifyFriendship($id1, $id2, ManagerRegistry $doctrine, SerializerInterface $serializer): JsonResponse
+    {
+        try {
+            $memberRepository = $doctrine->getRepository(Member::class);
+            $member1 = new Member();
+            $member1 = $memberRepository->find($id1);
+            $member2 = new Member();
+            $member2 = $memberRepository->find($id2);
 
-//  get friend request by member id
+            $friends = $member1->getFriends();
+
+            $exists = false;
+            foreach ($friends as $member) {
+                if ($member2 == $member) {
+                    $exists = true;
+                    break;
+                }
+            }
+
+            $data = [
+                'areFriends' => $exists,
+            ];
+
+            return new JsonResponse($data, 200, ['Content-Type' => 'application/json']);
+
+        } catch (Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+
+        }
+    }
+
+
 
 
 }
