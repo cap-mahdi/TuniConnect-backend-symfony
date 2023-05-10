@@ -111,6 +111,69 @@ public function uploadImage(Request $request,string $type,Member $person):void
 
 
 
+public function createAddress($data,$addressRepository){
+    if(($data['city']!="")&&($data['street']!="")&&($data['zipCode']!="")&&($data['country']!="")&&($data['state']!="")){
+        $address=new Address();
+        $address->setCity($data['city']);
+        $address->setStreet($data['street']);
+        $address->setZipCode($data['zipCode']);
+        $address->setCountry($data['country']);
+        $address->setState($data['state']);
+        $addressRepository->save($address,true);
+        return $address;
+    }
+    else{
+        return null;
+    }
+}
+
+public function createUser($data,$userRepository){
+    $user=new User();
+    if($data['email']!=""){
+        //test if there is another person with same email
+        $testFind=$userRepository->findOneBy(["email"=>$data['email']]);
+        if($testFind!=null){
+            throw new \Exception("email already exists");
+        }
+        $user->setEmail($data['email']);
+    }
+    else{
+        throw new \Exception("email is required");
+    }
+    if($data['password']!="")
+    $user->setPassword($this->hasher->hashPassword($user,$data["password"]));
+    else{
+        throw new \Exception("password is required");
+    }
+    $user->setRoles(["ROLE_USER"]);
+    $userRepository->save($user,true);
+    return $user;
+}
+
+public function create_member($data,$user,$address)
+{
+    $member=new Member();
+    if(($data['firstName']!="")&&($data['lastName']!="")){
+    $member->setFirstName($data['firstName']); 
+    $member->setLastName($data['lastName']);
+}
+else{
+    throw new \Exception("first name and last name are required");
+}
+    if($data['birthday']!="")
+    $member->setBirthday(new \DateTime($data['birthday']));
+    if($data['gender']!="")
+    $member->setGender($data['gender']);
+    else
+    $member->setGender("male");
+    if($data['phone']!="")
+    $member->setPhone($data['phone']);
+    $member->setDateOfMembership(new \DateTime());
+    $member->setUser($user);
+    $member->setAddress($address);
+    return $member;
+
+}
 
 
 #[Route('/api/register', name: 'member.register' , methods: ['POST'])]
@@ -118,45 +181,30 @@ public function uploadImage(Request $request,string $type,Member $person):void
     {
         $data=$request->request->all();
         try{
-            $person=new Member();
-            $address=new Address();
-            $user=new User();
-            $user->setEmail($data["email"]);
-            $user->setPassword($this->hasher->hashPassword($user,$data["password"]));
-            $user->setRoles(["ROLE_USER"]);
-            $userRepository->save($user,true);
-
-        $person->setFirstName($data['firstName']);
-        $person->setLastName($data['lastName']);
-        $person->setBirthday(new \DateTime($data['birthday']));
-        $person->setGender($data['gender']);
-        $person->setPhone($data['phone']);
-        $person->setDateOfMembership(new \DateTime());
-        $person->setUser($user);
-
-
-        $address->setCity($data['city']);
-        $address->setStreet($data['street']);
-        $address->setZipCode($data['zipCode']);
-        $address->setCountry($data['country']);
-        $address->setState($data['state']);
-        $addressRepository->save($address,true);
-        $person->setAddress($address);
+            $user=$this->createUser($data,$userRepository);
+            
+            $address=$this->createAddress($data,$addressRepository);
+            if($address!=null){
+            $member=$this->create_member($data,$user,$address);
+            $memberRepository->save($member,true);
+            }
+            else{
+                throw new \Exception("address is not valid");
+            }
+        
 
 
 
         
         
-        $user->setPerson($person);
+        $user->setPerson($member);
         $userRepository->save($user,true);
         
-        $this->uploadImage($request,"cover",$person);
-        $this->uploadImage($request,"profile",$person);
+        $this->uploadImage($request,"cover",$member);
+        $this->uploadImage($request,"profile",$member);
         
-        $memberRepository->save($person,true);
-        dump("here");
+        $memberRepository->save($member,true);
         $token=$jwtManager->create($user);
-        dump($token);
         return new JsonResponse(['token' => $token],200 );
         }
 
