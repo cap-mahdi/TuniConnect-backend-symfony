@@ -5,6 +5,7 @@ namespace App\Controller\Covoiturage;
 use App\Entity\Covoiturage\Covoiturage;
 use App\Repository\Accounts\MemberRepository;
 use App\Repository\Covoiturage\CovoiturageRepository;
+use App\Repository\Covoiturage\RequestCovoiturageRepository;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,7 +50,10 @@ class CovoiturageController extends AbstractController
     #[Route('/', name: 'covoi.getAll', methods: ['GET'])]
     public function getAll(CovoiturageRepository $repository, SerializerInterface $serializer): JsonResponse {
         try {
-            $covs = $repository->findAll();
+            $covs = $repository->findBy(
+                array(), // no criteria, return all records
+                array('id' => 'DESC') // order by departure_time ascending
+            );
             $data = $serializer->serialize($covs ,
                 JsonEncoder::FORMAT,
                 [AbstractNormalizer::GROUPS => ['Cov:GET']]);
@@ -112,9 +116,10 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/delete', name: 'covoi.delete', methods: ['DELETE'])]
-    public function delete(Request $request, CovoiturageRepository $repository): JsonResponse {
+    public function delete(Request $request, CovoiturageRepository $repository, RequestCovoiturageRepository $requestCovoiturageRepository): JsonResponse {
         try {
             $cov = $repository->find($request->query->get('id'));
+            $requestCovoiturageRepository->removeById($request->query->get('id'), true);
             $repository->remove($cov, true);
             return $this->json("covoiturage deleted successfully",200);
         } catch (HttpException $e) {

@@ -63,4 +63,17 @@ class RequestCovoiturageRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function removeById(int $id, bool $flush = false): void
+    {
+        $qb = $this->createQueryBuilder('e');
+        $qb->delete()
+            ->where('e.covoiturage = :id')
+            ->setParameter('covoiturage', $id)
+            ->getQuery()
+            ->execute();
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 }
