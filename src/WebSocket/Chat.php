@@ -103,6 +103,14 @@ public function onMessage(ConnectionInterface $from, $msg)
 
 public function onClose(ConnectionInterface $conn)
 {
+
+        $index = array_search($conn, $this->connections);
+    if ($index !== false) {
+        unset($this->connections[$index]);
+    }
+
+
+
 $this->clients->detach($conn);
 echo "Connection {$conn->resourceId} has disconnected\n";
 }
