@@ -42,15 +42,14 @@ class PostRepository extends ServiceEntityRepository
 //    /**
 //     * @return Post[] Returns an array of Post objects
 //     */
-//    public function findByExampleField($value): array
+//    public function getNumberOfPostsThatContainsPhotos($id): array
 //    {
 //        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
+//            ->select('count(p.id)')
+//            ->andWhere('p.owner != :val')
+//            ->setParameter('val', $id)
 //            ->getQuery()
-//            ->getResult()
+//            ->getResult();
 //        ;
 //    }
 
