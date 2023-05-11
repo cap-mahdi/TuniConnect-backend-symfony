@@ -6,11 +6,15 @@ use App\Entity\Accounts\Address;
 use App\Entity\Accounts\Member;
 use App\Entity\Accounts\User;
 use App\Entity\Covoiturage\RequestCovoiturage;
+use App\Entity\Posts\SharedPost;
 use App\Repository\Covoiturage\CovoiturageRepository;
 use App\Repository\Covoiturage\RequestCovoiturageRepository;
 use App\Repository\Accounts\MemberRepository;
 use App\Repository\Accounts\AddressRepository;
 use App\Repository\Accounts\UserRepository;
+use App\Repository\Posts\CommentRepository;
+use App\Repository\Posts\PostRepository;
+use App\Repository\SharedPostRepository;
 use \Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -206,8 +210,8 @@ class MemberController extends AbstractController
         } catch (Exception $exception) {
             return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
 
-    }}
-
+        }
+    }
 
 
     #[Route('/sendCovRequest', name: 'member.CovRequest', methods: ['POST'])]
@@ -240,7 +244,8 @@ class MemberController extends AbstractController
     }
 
     #[Route('/acceptCov', name: 'member.acceptCov', methods: ['PUT'])]
-    public function acceptCovRequest(Request $request, RequestCovoiturageRepository $requestCovoiturageRepository, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository, SerializerInterface $serializer): JsonResponse {
+    public function acceptCovRequest(Request $request, RequestCovoiturageRepository $requestCovoiturageRepository, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository, SerializerInterface $serializer): JsonResponse
+    {
         try {
             $sender = $memberRepository->find($request->query->get('sender_id'));
             $covoiturage = $covoiturageRepository->find($request->query->get('covoiturage_id'));
@@ -253,20 +258,21 @@ class MemberController extends AbstractController
             }
 
             $Request->setStatus('accepted');
-            $covoiturage->setNumberOfPlacesTaken($covoiturage->getNumberOfPlacesTaken()+1);
+            $covoiturage->setNumberOfPlacesTaken($covoiturage->getNumberOfPlacesTaken() + 1);
             $sender->addCovoituragesTaken($covoiturage);
             $requestCovoiturageRepository->save($Request, true);
             $covoiturageRepository->save($covoiturage, true);
 
             $data = $serializer->serialize($Request, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
-        }catch (HttpException $e) {
+        } catch (HttpException $e) {
             return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
 
     #[Route('/rejectCov', name: 'member.rejectCov', methods: ['PUT'])]
-    public function rejectCovRequest(Request $request, RequestCovoiturageRepository $requestCovoiturageRepository, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository, SerializerInterface $serializer): JsonResponse {
+    public function rejectCovRequest(Request $request, RequestCovoiturageRepository $requestCovoiturageRepository, MemberRepository $memberRepository, CovoiturageRepository $covoiturageRepository, SerializerInterface $serializer): JsonResponse
+    {
         try {
             $sender = $memberRepository->find($request->query->get('sender_id'));
             $covoiturage = $covoiturageRepository->find($request->query->get('covoiturage_id'));
@@ -283,12 +289,10 @@ class MemberController extends AbstractController
 
             $data = $serializer->serialize($Request, JsonEncoder::FORMAT, [AbstractNormalizer::GROUPS => ['ReqCov: POST']]);
             return new JsonResponse($data, Response::HTTP_CREATED, [], true);
-        }catch (HttpException $e) {
+        } catch (HttpException $e) {
             return new JsonResponse($e->getMessage(), $e->getStatusCode(), [], true);
         }
     }
-
-
 
 
 //  get friend request by member id
@@ -310,13 +314,95 @@ class MemberController extends AbstractController
         }
 
 
-}
+    }
 
 
 
 //  get friend request by member id
+//get member number of comments
+    #[Route('/get/number/comments/{id}', name: 'get_member_number_comments')]
+    public function getMemberNumberOfComments($id, CommentRepository $commentRepository): Response
+    {
+        try {
+            $count = count($commentRepository->findBy(['commenter' => $id]));
+            return new JsonResponse($count, 200, [], true);
 
+        } catch (Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
 
+        }
+
+    }
+    //get number of likes of member
+    #[Route('/get/number/likes/{id}', name: 'get_member_number_likes')]
+    public function getMemberNumberOfLikes(Member $member =null): Response
+    {
+        try {
+
+            return new JsonResponse(count($member->getLikedPosts()), 200, [], true);
+
+        } catch (Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+
+        }
+
+    }
+
+    //get number of shares of member
+    #[Route('/get/number/shares/{id}', name: 'get_member_number_shares')]
+    public function getMemberNumberOfShares(Member $member =null): Response
+    {
+        try {
+
+            return new JsonResponse(count($member->getSharedPosts()), 200, [], true);
+
+        } catch (Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+
+        }
+
+    }
+    //get number of photos of member
+    #[Route('/get/number/photos/{id}', name: 'get_member_number_photos')]
+    public function getMemberNumberOfPhotos(Member $member = null,PostRepository $postRepository): Response
+    {
+        try {
+            $posts = $postRepository->findBy(['owner' => $member]);
+            $counts = 0;
+            foreach ($posts as $post) {
+                if ($post->getPhotos() != null) {
+                    $counts++;
+                }
+            }
+            $counts += $member->getProfilePicture() != null ? 1 : 0;
+            $counts += $member->getCoverPicture() != null ? 1 : 0;
+            return new JsonResponse($counts, 200, [], true);
+
+        } catch (Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+
+        }
+
+    }
+
+    #[Route('/search/{keyword}', name: 'member.search')]
+    public function searchMembers(Request $request, ManagerRegistry $doctrine, SerializerInterface $serializer ,  $keyword): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $repository = $entityManager->getRepository(Member::class);
+
+        $members = $repository->createQueryBuilder('m')
+            ->where('m.firstName LIKE :keyword OR m.lastName LIKE :keyword')
+            ->setParameter('keyword', '%'.$keyword.'%')
+            ->getQuery()
+            ->getResult();
+
+        $data = $serializer->serialize($members,
+            JsonEncoder::FORMAT,
+            [AbstractNormalizer::GROUPS => 'member']);
+
+        return new JsonResponse($data, 200, [], true);
+    }
 }
 
 

@@ -76,19 +76,13 @@ class SharedPostController extends AbstractController
     }
 
     #[Route('/get/user/{id}', name: 'shared_post.get_all_by_user', methods: ['GET'])]
-    public function getAllPostsByUser(Member $member = null, SerializerInterface $serializer): Response
+    public function getAllPostsByUserPaginated($id, SerializerInterface $serializer,Request $request,SharedPostRepository $sharedPostRepository): Response
     {
         try {
-            $memberPosts = $member->getSharedPosts()->toArray();
-            usort($memberPosts, function ($sharedPost1, $sharedPost2) {
-                $date1 = $sharedPost1->getDate();
-                $date2 = $sharedPost2->getDate();
-                if ($date1 == $date2) {
-                    return 0;
-                }
-                return ($date1 > $date2) ? -1 : 1;
-            });
-            $jsonData = $serializer->serialize($memberPosts, 'json', ['groups' => 'SharedPost']);
+            $limit = $request->query->get('limit');
+            $offset = $request->query->get('offset');
+            $userPosts = $sharedPostRepository->findBy(['sharer'=>$id],['date'=>'DESC'],$limit,$offset);
+            $jsonData = $serializer->serialize($userPosts, 'json', ['groups' => 'SharedPost']);
             return new Response($jsonData, 200, ["Content-Type" => "application/json"]);
 
         } catch (\Exception $exception) {
@@ -158,12 +152,11 @@ class SharedPostController extends AbstractController
             $newComment->setCommenter($member);
             $sharedPost->addComment($newComment);
             $manager = $doctrine->getManager();
-
             $manager->persist($newComment);
             $manager->persist($sharedPost);
 
             $manager->flush();
-            $jsonData = $serializer->serialize(["id"=>$newComment->getId()], 'json');
+            $jsonData = $serializer->serialize($newComment, 'json',['groups' => 'Comment:GetAll']);
             return new Response($jsonData, 200, ["Content-Type" => "application/json"]);
 
         } catch (\Exception $exception) {
@@ -229,6 +222,31 @@ class SharedPostController extends AbstractController
 
             $jsonData = $serializer->serialize($sharedPost, 'json', ['groups' => 'SharedPost']);
             return new Response($jsonData, 200, ["Content-Type" => "application/json"]);
+
+        } catch (\Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+        }
+    }
+
+    //get likes of a post
+    #[Route('/get/likes/{id}', name: 'shared_post.get_likes', methods: ['GET'])]
+    public function getPostLikes(SharedPost $sharedPost = null, SerializerInterface $serializer): Response
+    {
+        try {
+
+            return new Response($sharedPost->getLikers()->count(), 200, ["Content-Type" => "application/json"]);
+
+        } catch (\Exception $exception) {
+            return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
+        }
+    }
+
+    #[Route('/get/comments/{id}', name: 'shared_post.get_comments', methods: ['GET'])]
+    public function getPostComments(SharedPost $sharedPost = null,): Response
+    {
+        try {
+
+            return new Response($sharedPost->getComments()->count(), 200, ["Content-Type" => "application/json"]);
 
         } catch (\Exception $exception) {
             return $this->json($exception->getMessage(), 500, ["Content-Type" => "application/json"]);
