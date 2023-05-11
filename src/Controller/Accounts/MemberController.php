@@ -212,8 +212,8 @@ class MemberController extends AbstractController
 
         }
     }
-        }
-    }
+
+
 
 
     #[Route('/sendCovRequest', name: 'member.CovRequest', methods: ['POST'])]
