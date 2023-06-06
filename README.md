@@ -1,6 +1,6 @@
 ## Contributor Note
 
-**Note:** My contributions are made under the username MahdiChaabane
+**Note:** My contributions are made under the username MahdiChaabane(my institutional github account)
 
 ## Tuniconnect Web Application
 
