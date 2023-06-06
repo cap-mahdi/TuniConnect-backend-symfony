@@ -1,3 +1,7 @@
+## Contributor Note
+
+**Note:** My contributions are made under the username MahdiChaabane
+
 ## Tuniconnect Web Application
 
 Thank you for your interest in Tuniconnect! Follow the steps below to set up and run the web application on your local machine.
